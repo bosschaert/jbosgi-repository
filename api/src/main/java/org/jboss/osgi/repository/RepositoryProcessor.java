@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,31 +17,22 @@
  * limitations under the License.
  * #L%
  */
-package org.jboss.osgi.repository.spi;
+package org.jboss.osgi.repository;
 
-import org.jboss.osgi.repository.RepositoryCachePlugin;
-import org.jboss.osgi.repository.RepositoryStorageException;
-import org.osgi.resource.Capability;
-import org.osgi.resource.Requirement;
+import java.util.Map;
 
-import java.util.Collection;
-import java.util.Collections;
+import org.jboss.osgi.resolver.XResource;
+
 
 /**
- * An abstract  {@link RepositoryCachePlugin} that does nothing
+ * A callback interface for the {@link RepositoryXMLReader}
  *
  * @author thomas.diesler@jboss.com
  * @since 16-Jan-2012
  */
-public class AbstractRepositoryCachePlugin implements RepositoryCachePlugin {
+public interface RepositoryProcessor {
 
-    @Override
-    public Collection<Capability> findProviders(Requirement req) {
-        return Collections.emptyList();
-    }
+    boolean addRepository(String namespace, Map<String, String> attributes);
 
-    @Override
-    public Collection<Capability> storeCapabilities(Collection<Capability> caps) throws RepositoryStorageException {
-        return caps;
-    }
+    boolean addResource(XResource resource);
 }

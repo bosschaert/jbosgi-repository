@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,23 +17,30 @@
  * limitations under the License.
  * #L%
  */
-
 package org.jboss.osgi.repository;
 
 import java.util.Collection;
 
 import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;
+import org.osgi.service.repository.Repository;
 
 /**
- * Handles storage of repository artifacts
+ * An extension of the {@link Repository} interface
  *
  * @author thomas.diesler@jboss.com
- * @since 16-Jan-2012
+ * @since 11-May-2012
  */
-public interface RepositoryCachePlugin {
+public interface XRepository extends Repository {
 
-    Collection<Capability> findProviders(Requirement req);
-
-    Collection<Capability> storeCapabilities(Collection<Capability> caps) throws RepositoryStorageException;
+    /**
+     * Find the capabilities that match the specified requirement.
+     *
+     * @param requirement The requirements for which matching capabilities
+     *        should be returned. Must not be {@code null}.
+     * @return A collection of matching capabilities for the specified requirements.
+     *         If there are no matching capabilities an empty collection is returned.
+     *         The returned collection is the property of the caller and can be modified by the caller.
+     */
+    Collection<Capability> findProviders(Requirement requirement);
 }
