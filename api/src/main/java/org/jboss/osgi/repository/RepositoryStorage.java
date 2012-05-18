@@ -21,7 +21,6 @@ package org.jboss.osgi.repository;
 
 import java.io.InputStream;
 import java.util.Collection;
-import java.util.Iterator;
 
 import org.jboss.osgi.resolver.XResource;
 import org.osgi.resource.Capability;
@@ -36,6 +35,11 @@ import org.osgi.resource.Requirement;
 public interface RepositoryStorage {
 
     /**
+     * Get the name for this repository storage
+     */
+    String getName();
+
+    /**
      * Find the capabilities that match the specified requirement.
      *
      * @param requirement The requirements for which matching capabilities should be returned. Must not be {@code null}.
@@ -46,9 +50,9 @@ public interface RepositoryStorage {
     Collection<Capability> findProviders(Requirement requirement);
 
     /**
-     * Return an iterator over the resource collection known to this storage
+     * Get the repository reader for this storage
      */
-    Iterator<XResource> getResources();
+    RepositoryReader getRepositoryReader();
 
     /**
      * Add the given resource to storage
