@@ -55,7 +55,11 @@ public class MemoryRepositoryStorage implements RepositoryStorage {
 
     @Override
     public String getName() {
-        return "Default Repository Storage";
+        return getClass().getSimpleName();
+    }
+
+    protected AtomicLong getAtomicIncrement() {
+        return increment;
     }
 
     @Override
@@ -114,6 +118,7 @@ public class MemoryRepositoryStorage implements RepositoryStorage {
                 Set<Capability> capset = findCachedProviders(cachekey, true);
                 capset.add(cap);
             }
+            increment.incrementAndGet();
             LOGGER.infoResourceAdded(res);
         }
         return res;
