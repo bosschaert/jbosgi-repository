@@ -17,28 +17,19 @@
  * limitations under the License.
  * #L%
  */
-package org.jboss.osgi.repository.spi;
+package org.jboss.osgi.repository;
 
-import java.util.Map;
-
-import org.jboss.osgi.repository.RepositoryProcessor;
-import org.jboss.osgi.resolver.XResource;
 
 /**
- * A {@link RepositoryProcessor} that does nothing.
+ * An extension of the {@link XRepository} that provides capability persistence.
  *
  * @author thomas.diesler@jboss.com
  * @since 11-May-2012
  */
-public class AbstractRepositoryProcessor implements RepositoryProcessor {
+public interface XPersistentRepository extends XRepository {
 
-    @Override
-    public boolean addRepository(String namespace, Map<String, String> attributes) {
-        return true;
-    }
-
-    @Override
-    public boolean addResource(XResource resource) {
-        return true;
-    }
+    /**
+     * Get the associated repository storage
+     */
+    RepositoryStorage getRepositoryStorage();
 }

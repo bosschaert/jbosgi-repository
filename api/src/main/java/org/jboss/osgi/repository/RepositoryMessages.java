@@ -68,4 +68,10 @@ public interface RepositoryMessages {
 
     @Message(id = 20509, value = "Cannot obtain input stream for: %s")
     RepositoryStorageException storageCannotObtainInputStream(@Cause Throwable th, XResource res);
+
+    @Message(id = 20510, value = "Cannot initialize repository writer")
+    IllegalStateException illegalStateCannotInitializeRepositoryWriter(@Cause Throwable th);
+
+    @Message(id = 20511, value = "Cannot write repository element")
+    IllegalStateException illegalStateCannotWriteRepositoryElement(@Cause Throwable th);
 }

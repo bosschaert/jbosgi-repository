@@ -23,11 +23,14 @@ package org.jboss.test.osgi.repository;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.stream.XMLStreamException;
 
 import org.jboss.osgi.repository.RepositoryReader;
-import org.jboss.osgi.repository.core.RepositoryReaderFactory;
+import org.jboss.osgi.repository.RepositoryXMLReader;
+import org.jboss.osgi.resolver.XResource;
 
 /**
  *
@@ -38,7 +41,17 @@ public abstract class AbstractRepositoryTest {
 
     protected RepositoryReader getRepositoryReader(String xmlres) throws XMLStreamException {
         InputStream input = getClass().getClassLoader().getResourceAsStream(xmlres);
-        return RepositoryReaderFactory.create(input);
+        return RepositoryXMLReader.create(input);
+    }
+
+    protected List<XResource> getResources(RepositoryReader reader) {
+        List<XResource> resources = new ArrayList<XResource>();
+        XResource resource = reader.nextResource();
+        while (resource != null) {
+            resources.add(resource);
+            resource = reader.nextResource();
+        }
+        return resources;
     }
 
     protected void deleteRecursive(File file) {

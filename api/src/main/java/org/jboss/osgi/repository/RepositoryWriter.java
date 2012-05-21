@@ -19,25 +19,21 @@
  */
 package org.jboss.osgi.repository;
 
+import java.util.Map;
+
+import org.jboss.osgi.resolver.XResource;
 
 /**
- * An extension of the {@link XRepository} that provides capability caching.
- *
- * Implementations are expected to first search the cache for matching capabilities.
- * If there is no capability in the cache the search continues in the repository delegate.
+ * Write repository contnet.
  *
  * @author thomas.diesler@jboss.com
- * @since 11-May-2012
+ * @since 21-May-2012
  */
-public interface XCachingRepository extends XRepository {
+public interface RepositoryWriter {
 
-    /**
-     * Get the associated repository storage
-     */
-    RepositoryStorage getRepositoryStorage();
+    void writeRepositoryAttributes(Map<String, String> attributes);
 
-    /**
-     * Get the associated repository delegate
-     */
-    XRepository getRepositoryDelegate();
+    void writeResource(XResource resource);
+
+    void close();
 }
