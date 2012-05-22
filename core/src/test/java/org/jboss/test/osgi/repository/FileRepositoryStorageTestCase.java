@@ -19,8 +19,6 @@
  */
 package org.jboss.test.osgi.repository;
 
-
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,6 +28,7 @@ import java.util.Collection;
 import junit.framework.Assert;
 
 import org.jboss.osgi.repository.RepositoryStorage;
+import org.jboss.osgi.repository.XRepository;
 import org.jboss.osgi.repository.core.FileBasedRepositoryStorage;
 import org.jboss.osgi.resolver.XCapability;
 import org.jboss.osgi.resolver.XPackageCapability;
@@ -43,6 +42,7 @@ import org.jboss.shrinkwrap.api.exporter.ZipExporter;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.resource.Capability;
 import org.osgi.service.repository.ContentNamespace;
@@ -61,8 +61,10 @@ public class FileRepositoryStorageTestCase extends AbstractRepositoryTest {
     @Before
     public void setUp() throws IOException {
         cacheFile = new File("./target/repository");
-        storage = new FileBasedRepositoryStorage(cacheFile);
         deleteRecursive(cacheFile);
+        XRepository repo = Mockito.mock(XRepository.class);
+        Mockito.when(repo.getName()).thenReturn("MockedRepo");
+        storage = new FileBasedRepositoryStorage(repo, cacheFile);
     }
 
     @Test
@@ -79,7 +81,7 @@ public class FileRepositoryStorageTestCase extends AbstractRepositoryTest {
         Assert.assertEquals("application/vnd.osgi.bundle", ccap.getAttribute(ContentNamespace.CAPABILITY_MIME_ATTRIBUTE));
         Assert.assertNotNull(ccap.getAttribute(ContentNamespace.CAPABILITY_SIZE_ATTRIBUTE));
         Assert.assertNotNull(ccap.getAttribute(ContentNamespace.CONTENT_NAMESPACE));
-        URL fileURL = (URL) ccap.getAttribute(ContentNamespace.CAPABILITY_URL_ATTRIBUTE);
+        URL fileURL = new URL((String) ccap.getAttribute(ContentNamespace.CAPABILITY_URL_ATTRIBUTE));
         Assert.assertTrue("File exists: " + fileURL, new File(fileURL.getPath()).exists());
 
         XRequirement req = XRequirementBuilder.createRequirement(PackageNamespace.PACKAGE_NAMESPACE, "org.acme.foo");
