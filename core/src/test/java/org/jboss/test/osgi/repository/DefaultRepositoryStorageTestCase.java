@@ -25,6 +25,7 @@ import junit.framework.Assert;
 
 import org.jboss.osgi.repository.RepositoryReader;
 import org.jboss.osgi.repository.RepositoryStorage;
+import org.jboss.osgi.repository.XRepository;
 import org.jboss.osgi.repository.spi.MemoryRepositoryStorage;
 import org.jboss.osgi.resolver.XCapability;
 import org.jboss.osgi.resolver.XRequirement;
@@ -32,6 +33,7 @@ import org.jboss.osgi.resolver.XRequirementBuilder;
 import org.jboss.osgi.resolver.XResource;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.osgi.framework.namespace.BundleNamespace;
 import org.osgi.resource.Capability;
 
@@ -47,7 +49,7 @@ public class DefaultRepositoryStorageTestCase extends AbstractRepositoryTest {
 
     @Before
     public void setUp() throws Exception {
-        storage = new MemoryRepositoryStorage();
+        storage = new MemoryRepositoryStorage(Mockito.mock(XRepository.class));
         RepositoryReader reader = getRepositoryReader("xml/sample-repository.xml");
         storage.addResource(reader.nextResource());
     }
