@@ -24,11 +24,13 @@ import java.net.URL;
 import org.jboss.osgi.repository.RepositoryReader;
 import org.jboss.osgi.repository.RepositoryStorage;
 import org.jboss.osgi.repository.RepositoryXMLReader;
+import org.jboss.osgi.repository.XPersistentRepository;
 import org.jboss.osgi.resolver.XResource;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
+import org.osgi.service.repository.Repository;
 import org.osgi.util.tracker.BundleTracker;
 import org.osgi.util.tracker.ServiceTracker;
 
@@ -76,13 +78,16 @@ public class Activator implements BundleActivator {
 
     public void primeRepository(BundleContext context, Bundle bundle) {
         System.err.println("*********** priming from: " + bundle);
-        ServiceTracker st = new ServiceTracker(context, RepositoryStorage.class.getName(), null);
+        ServiceTracker st = new ServiceTracker(context, Repository.class.getName(), null);
         st.open();
 
         try {
-            RepositoryStorage rs = (RepositoryStorage) st.waitForService(10000);
-            if (rs == null)
+            Repository rep = (Repository) st.waitForService(10000);
+            if (rep == null)
                 throw new IllegalStateException("Unable to find service: " + RepositoryStorage.class);
+            XPersistentRepository xpr = (XPersistentRepository) rep;
+            RepositoryStorage rs = xpr.getRepositoryStorage();
+            System.err.println("*********** obtained Repository Storage: " + rs);
 
             URL contentURL = bundle.getResource("xml/content1.xml");
             RepositoryReader reader = RepositoryXMLReader.create(contentURL.openStream());
