@@ -26,10 +26,10 @@ import junit.framework.Assert;
 import org.jboss.osgi.repository.RepositoryReader;
 import org.jboss.osgi.repository.RepositoryStorage;
 import org.jboss.osgi.repository.XRepository;
+import org.jboss.osgi.repository.XRequirementBuilder;
 import org.jboss.osgi.repository.spi.MemoryRepositoryStorage;
 import org.jboss.osgi.resolver.XCapability;
 import org.jboss.osgi.resolver.XRequirement;
-import org.jboss.osgi.resolver.XRequirementBuilder;
 import org.jboss.osgi.resolver.XResource;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,7 +43,7 @@ import org.osgi.resource.Capability;
  * @author thomas.diesler@jboss.com
  * @since 16-Jan-2012
  */
-public class DefaultRepositoryStorageTestCase extends AbstractRepositoryTest {
+public class MemoryRepositoryStorageTestCase extends AbstractRepositoryTest {
 
     private RepositoryStorage storage;
 
@@ -62,7 +62,8 @@ public class DefaultRepositoryStorageTestCase extends AbstractRepositoryTest {
         Assert.assertNotNull("Resource not null", resource);
         Assert.assertNull("One resource only", reader.nextResource());
 
-        XRequirement req = XRequirementBuilder.createRequirement(BundleNamespace.BUNDLE_NAMESPACE, "org.acme.pool");
+        XRequirementBuilder builder = XRequirementBuilder.create(BundleNamespace.BUNDLE_NAMESPACE, "org.acme.pool");
+        XRequirement req = builder.getRequirement();
 
         Collection<Capability> providers = storage.findProviders(req);
         Assert.assertNotNull(providers);
@@ -71,5 +72,20 @@ public class DefaultRepositoryStorageTestCase extends AbstractRepositoryTest {
         XCapability cap = (XCapability) providers.iterator().next();
         Assert.assertNotNull(cap);
         Assert.assertSame(resource, cap.getResource());
+    }
+
+    @Test
+    public void testRequireBundleWithFilter() throws Exception {
+
+        XRequirementBuilder builder = XRequirementBuilder.create(BundleNamespace.BUNDLE_NAMESPACE);
+        builder.getDirectives().put(BundleNamespace.REQUIREMENT_FILTER_DIRECTIVE, "(osgi.wiring.bundle=org.acme.pool)");
+        XRequirement req = builder.getRequirement();
+
+        Collection<Capability> providers = storage.findProviders(req);
+        Assert.assertNotNull(providers);
+        Assert.assertEquals(1, providers.size());
+
+        XCapability cap = (XCapability) providers.iterator().next();
+        Assert.assertNotNull(cap);
     }
 }
