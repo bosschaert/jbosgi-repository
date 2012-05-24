@@ -21,6 +21,7 @@ package org.jboss.osgi.repository.spi;
 
 import static org.jboss.osgi.repository.RepositoryLogger.LOGGER;
 import static org.jboss.osgi.repository.RepositoryMessages.MESSAGES;
+import static org.jboss.osgi.resolver.spi.AbstractRequirement.namespaceValueFromFilter;
 
 import java.io.InputStream;
 import java.util.Collection;
@@ -39,6 +40,10 @@ import org.jboss.osgi.repository.RepositoryStorageException;
 import org.jboss.osgi.repository.XRepository;
 import org.jboss.osgi.resolver.XIdentityCapability;
 import org.jboss.osgi.resolver.XResource;
+import org.osgi.framework.Filter;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.namespace.AbstractWiringNamespace;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;
 
@@ -182,20 +187,38 @@ public class MemoryRepositoryStorage implements RepositoryStorage {
         /**
          * Create a cache key from the given capability
          */
-        static CacheKey create(Capability capability) {
-            String namespace = capability.getNamespace();
-            return new CacheKey(namespace, (String) capability.getAttributes().get(namespace));
+        static CacheKey create(Capability cap) {
+            String namespace = cap.getNamespace();
+            return new CacheKey(namespace, (String) cap.getAttributes().get(namespace));
         }
 
         /**
          * Create a cache key from the given requirement
          */
-        static CacheKey create(Requirement requirement) {
-            String namespace = requirement.getNamespace();
-            return new CacheKey(namespace, (String) requirement.getAttributes().get(namespace));
+        static CacheKey create(Requirement req) {
+            String namespace = req.getNamespace();
+            String value = (String) req.getAttributes().get(namespace);
+            if (value == null) {
+                Filter filter = getRequiredFilter(req);
+                value = namespaceValueFromFilter(filter, namespace);
+            }
+            return new CacheKey(namespace, value);
+        }
+
+        private static Filter getRequiredFilter(Requirement req) {
+            String filterdir = req.getDirectives().get(AbstractWiringNamespace.REQUIREMENT_FILTER_DIRECTIVE);
+            try {
+                return FrameworkUtil.createFilter("" + filterdir);
+            } catch (InvalidSyntaxException e) {
+                throw MESSAGES.illegalArgumentInvalidFilterDirective(filterdir);
+            }
         }
 
         private CacheKey(String namespace, String value) {
+            if (namespace == null)
+                throw MESSAGES.illegalArgumentNull("namespace");
+            if (value == null)
+                throw MESSAGES.illegalArgumentNull("value");
             key = namespace + ":" + value;
         }
 
