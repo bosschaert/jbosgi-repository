@@ -4,17 +4,19 @@
  * %%
  * Copyright (C) 2011 - 2012 JBoss by Red Hat
  * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as 
+ * published by the Free Software Foundation, either version 2.1 of the 
+ * License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Lesser Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Lesser Public 
+ * License along with this program.  If not, see
+ * <http://www.gnu.org/licenses/lgpl-2.1.html>.
  * #L%
  */
 
@@ -57,7 +59,7 @@ import org.osgi.service.repository.RepositoryContent;
 /**
  * A simple {@link RepositoryStorage} that uses
  * the local file system.
- *
+ * 
  * @author thomas.diesler@jboss.com
  * @since 16-Jan-2012
  */
@@ -86,7 +88,7 @@ public class FileBasedRepositoryStorage extends MemoryRepositoryStorage {
             }
             Long increment = new Long(reader.getRepositoryAttributes().get(Attribute.INCREMENT.getLocalName()));
             XResource res = reader.nextResource();
-            while(res != null) {
+            while (res != null) {
                 addResourceInternal(res, false);
                 res = reader.nextResource();
             }
@@ -113,7 +115,7 @@ public class FileBasedRepositoryStorage extends MemoryRepositoryStorage {
             throw MESSAGES.storageCannotObtainContentCapablility(res);
 
         XCapability ccap = (XCapability) ccaps.get(0);
-        String contentURL = (String)ccap.getAttribute(ContentNamespace.CAPABILITY_URL_ATTRIBUTE);
+        String contentURL = (String) ccap.getAttribute(ContentNamespace.CAPABILITY_URL_ATTRIBUTE);
         if (contentURL == null)
             throw MESSAGES.storageCannotObtainContentURL(res);
 
@@ -270,7 +272,7 @@ public class FileBasedRepositoryStorage extends MemoryRepositoryStorage {
         writer.writeRepositoryAttributes(attributes);
         RepositoryReader reader = getRepositoryReader();
         XResource resource = reader.nextResource();
-        while(resource != null) {
+        while (resource != null) {
             writer.writeResource(resource);
             resource = reader.nextResource();
         }
