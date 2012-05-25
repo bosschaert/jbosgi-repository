@@ -20,6 +20,7 @@
 package org.jboss.osgi.repository;
 
 
+
 /**
  * An extension of the {@link XRepository} that provides capability persistence.
  *

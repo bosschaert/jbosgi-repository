@@ -20,7 +20,6 @@
 package org.jboss.osgi.repository.core;
 
 import static org.jboss.osgi.repository.RepositoryLogger.LOGGER;
-import static org.jboss.osgi.resolver.XResourceConstants.MAVEN_IDENTITY_NAMESPACE;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,7 +33,6 @@ import org.jboss.osgi.repository.URLResourceBuilderFactory;
 import org.jboss.osgi.repository.XRepository;
 import org.jboss.osgi.repository.spi.AbstractRepository;
 import org.jboss.osgi.resolver.MavenCoordinates;
-import org.jboss.osgi.resolver.XResource;
 import org.jboss.osgi.resolver.XResourceBuilder;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;
@@ -66,11 +64,6 @@ public class MavenArtifactRepository extends AbstractRepository implements XRepo
     }
 
     @Override
-    public String getName() {
-        return "Maven Artifact Repository";
-    }
-
-    @Override
     public Collection<Capability> findProviders(Requirement req) {
         String namespace = req.getNamespace();
         List<Capability> result = new ArrayList<Capability>();
@@ -83,16 +76,13 @@ public class MavenArtifactRepository extends AbstractRepository implements XRepo
                 try {
                     url.openStream().close();
                 } catch (IOException e) {
-                    LOGGER.errorCannotOpenInputStream(url);
+                    LOGGER.debugf("Cannot access input stream for: %s", url);
                     continue;
                 }
                 try {
-                    String contentPath = url.toExternalForm();
-                    contentPath = contentPath.substring(baseURL.toExternalForm().length());
-                    XResourceBuilder builder = URLResourceBuilderFactory.create(baseURL, contentPath, null, true);
-                    XResource resource = builder.getResource();
-                    result.add(resource.getIdentityCapability());
-                    LOGGER.infoFoundMavenResource(resource);
+                    XResourceBuilder builder = URLResourceBuilderFactory.create(url, null, true);
+                    result.add(builder.addGenericCapability(MAVEN_IDENTITY_NAMESPACE, mavenId));
+                    LOGGER.infoFoundMavenResource(builder.getResource());
                     break;
                 } catch (Exception ex) {
                     LOGGER.resolutionCannotCreateResource(ex, coordinates);

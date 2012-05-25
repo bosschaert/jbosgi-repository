@@ -22,8 +22,6 @@ package org.jboss.osgi.repository;
 import static org.jboss.logging.Logger.Level.ERROR;
 import static org.jboss.logging.Logger.Level.INFO;
 
-import java.net.URL;
-
 import org.jboss.logging.BasicLogger;
 import org.jboss.logging.Cause;
 import org.jboss.logging.LogMessage;
@@ -62,10 +60,6 @@ public interface RepositoryLogger extends BasicLogger {
     void infoFoundMavenResource(XResource resource);
 
     @LogMessage(level = ERROR)
-    @Message(id = 20404, value = "Cannot access input stream for: %s")
-    void errorCannotOpenInputStream(URL url);
-
-    @LogMessage(level = ERROR)
-    @Message(id = 20405, value = "Cannot create resource for: %s")
+    @Message(id = 20404, value = "Cannot create resource for: %s")
     void resolutionCannotCreateResource(@Cause Throwable th, MavenCoordinates coordinates);
 }
