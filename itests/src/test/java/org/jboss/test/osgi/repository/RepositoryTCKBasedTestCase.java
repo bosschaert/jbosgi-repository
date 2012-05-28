@@ -55,6 +55,7 @@ import org.jboss.shrinkwrap.api.exporter.ZipExporter;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.jboss.test.osgi.repository.tb1.pkg1.TestInterface;
 import org.jboss.test.osgi.repository.tb1.pkg2.TestInterface2;
+import org.jboss.test.osgi.repository.tb2.TestClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -90,6 +91,12 @@ public class RepositoryTCKBasedTestCase {
                 return createTestBundle1().as(ZipExporter.class).exportAsInputStream();
             }
         }, "tb1.jar");
+        archive.addAsResource(new Asset() {
+            @Override
+            public InputStream openStream() {
+                return createTestBundle2().as(ZipExporter.class).exportAsInputStream();
+            }
+        }, "tb2.jar");
         archive.setManifest(new Asset () {
             @Override
             public InputStream openStream() {
@@ -111,10 +118,30 @@ public class RepositoryTCKBasedTestCase {
             @Override
             public InputStream openStream() {
                 OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
-                builder.addBundleSymbolicName("org.osgi.test.cases.repository.tb1");
+                builder.addBundleSymbolicName("org.jboss.test.cases.repository.tb1");
                 builder.addBundleVersion("1.0.0.test");
                 builder.addBundleManifestVersion(2);
                 builder.addExportPackages(TestInterface.class, TestInterface2.class);
+                return builder.openStream();
+            }
+        });
+        return archive;
+    }
+
+    public static JavaArchive createTestBundle2() {
+        final JavaArchive archive = ShrinkWrap.create(JavaArchive.class, "tb2");
+        archive.addClass(TestClass.class);
+        archive.setManifest(new Asset() {
+            @Override
+            public InputStream openStream() {
+                OSGiManifestBuilder builder = OSGiManifestBuilder.newInstance();
+                builder.addBundleSymbolicName("org.jboss.test.cases.repository.tb2");
+                builder.addBundleVersion("1.0");
+                builder.addBundleManifestVersion(2);
+                String exp = TestClass.class.getPackage().getName() + ";version=\"1.2.3.qualified\"";
+                builder.addExportPackages(exp);
+                String imp = TestInterface.class.getPackage().getName() + ";version=\"[0.9, 1)\"";
+                builder.addImportPackages(imp);
                 return builder.openStream();
             }
         });
@@ -133,6 +160,7 @@ public class RepositoryTCKBasedTestCase {
         URL xmlURL = getClass().getResource("/xml/test-repository1.xml");
         String xml = new String(readFully(xmlURL.openStream()));
         xml = fillInTemplate(xml, "tb1");
+        xml = fillInTemplate(xml, "tb2");
 
         ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes());
         RepositoryReader reader = RepositoryXMLReader.create(bais);
@@ -176,7 +204,7 @@ public class RepositoryTCKBasedTestCase {
         assertEquals(0, matchingCapabilities.size());
     }
 
-    // Fails in RI
+    @Test
     public void testQueryNoFilter() throws Exception {
         Requirement requirement = new RequirementImpl("osgi.wiring.bundle");
         Map<Requirement, Collection<Capability>> result = findProvidersAllRepos(requirement);
