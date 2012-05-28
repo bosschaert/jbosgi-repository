@@ -45,7 +45,7 @@
             <attribute name='testDoubleList' value='2.718281828459045,2.718281828459045' type='List&lt;Double&gt;'/>
         </capability>
         -->
-        <!-- Used in testQueryCustomNamespace(), removed as it currently doesn't work with the RI
+        <!-- Used in testQueryCustomNamespace(), removed as it currently fails the population stage
         <capability namespace='osgi.foo.bar'>
             <attribute name='myattr' value='myval'/>
         </capability>
@@ -76,7 +76,7 @@
             <attribute name='approved' value='yes' />
             <directive name='uses' value='org.jboss.test.cases.repository.tb1.pkg1' />
         </capability>
-        <!-- Used in testQueryCustomNamespace(), removed as it currently doesn't work with the RI
+        <!-- Used in testQueryCustomNamespace(), removed as it currently fails the population stage
         <capability namespace='osgi.foo.bar'>
             <attribute name='myattr' value='myotherval'/>
         </capability>

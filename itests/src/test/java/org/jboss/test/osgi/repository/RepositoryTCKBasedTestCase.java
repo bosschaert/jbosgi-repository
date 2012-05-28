@@ -225,7 +225,7 @@ public class RepositoryTCKBasedTestCase {
         assertTrue(foundtb2);
     }
 
-    // Fails in RI
+    @Test
     public void testQueryOnNonMainAttribute() throws Exception {
         Requirement requirement = new RequirementImpl("osgi.identity",
                 "(license=http://www.opensource.org/licenses/Apache-2.0)");
@@ -239,6 +239,7 @@ public class RepositoryTCKBasedTestCase {
         assertEquals("org.jboss.test.cases.repository.tb2", capability.getAttributes().get("osgi.identity"));
     }
 
+    @Test
     public void testDisconnectedQueries() throws Exception {
         Requirement req1 = new RequirementImpl("osgi.wiring.bundle",
                 "(osgi.wiring.bundle=org.jboss.test.cases.repository.tb1)");
@@ -259,7 +260,7 @@ public class RepositoryTCKBasedTestCase {
         assertEquals("org.jboss.test.cases.repository.tb2", cap2.getAttributes().get("osgi.wiring.bundle"));
     }
 
-    // Fails in RI
+    @Test
     public void testComplexQuery() throws Exception {
         Requirement req = new RequirementImpl("osgi.wiring.package",
                 "(|(osgi.wiring.package=org.jboss.test.cases.repository.tb1.pkg1)(osgi.wiring.package=org.jboss.test.cases.repository.tb2))");
@@ -282,7 +283,7 @@ public class RepositoryTCKBasedTestCase {
         assertTrue(foundtb2);
     }
 
-    // Fails in RI
+    @Test
     public void testComplexQueryWithCustomAttributeSpecificValue() throws Exception {
         Requirement req = new RequirementImpl("osgi.wiring.package",
                 "(&(|(osgi.wiring.package=org.jboss.test.cases.repository.tb1.pkg1)(osgi.wiring.package=org.jboss.test.cases.repository.tb2))(approved=yes))");
@@ -294,7 +295,7 @@ public class RepositoryTCKBasedTestCase {
         assertEquals("org.jboss.test.cases.repository.tb2", capability.getAttributes().get("bundle-symbolic-name"));
     }
 
-    // Fails in RI
+    @Test
     public void testComplexQueryWithCustomAttributeDefined() throws Exception {
         Requirement req = new RequirementImpl("osgi.wiring.package",
                 "(&(|(osgi.wiring.package=org.jboss.test.cases.repository.tb1.pkg1)(osgi.wiring.package=org.jboss.test.cases.repository.tb2))(approved=*))");
@@ -317,7 +318,7 @@ public class RepositoryTCKBasedTestCase {
         assertTrue(foundtb2);
     }
 
-    // Fails in RI, requires custom namespace capability currently commented out in content1.xml
+    @Test
     public void testQueryCustomNamespace() throws Exception {
         Requirement req = new RequirementImpl("osgi.foo.bar", "(myattr=myval)");
         Map<Requirement, Collection<Capability>> result = findProvidersAllRepos(req);
@@ -328,14 +329,7 @@ public class RepositoryTCKBasedTestCase {
         assertEquals("myval", capability.getAttributes().get("myattr"));
     }
 
-    /* TODO
-    public void testRepositoryContent2() throws Exception {
-        // on tb1 TODO!
-        fail();
-    }
-    */
-
-    // TODO fails sometimes on the SHA computation
+    @Test
     public void testRepositoryContent() throws Exception {
         Requirement req = new RequirementImpl("osgi.identity", "(osgi.identity=org.jboss.test.cases.repository.tb2)");
         Map<Requirement, Collection<Capability>> result = findProvidersAllRepos(req);
