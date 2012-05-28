@@ -29,7 +29,8 @@
             <attribute name='bundle-symbolic-name' value='org.jboss.test.cases.repository.tb1' />
             <attribute name='approved' value='no' />
         </capability>
-        <!-- Used in testAttributeDataTypes(), removed as the RI can't currently parse the List<> types
+        <!-- Used in testAttributeDataTypes(), removed as it currently fails the population stage
+             the List<String> etc are not parsing properly.
         <capability namespace='osgi.test.namespace'>
             <attribute name='osgi.test.namespace' value='a testing namespace'/>
             <attribute name='testString' value='' />
@@ -86,14 +87,6 @@
             <directive name='filter' value='(&amp;(osgi.wiring.package=org.jboss.test.cases.repository.tb1.pkg1)(version&gt;=1.1)(!(version&gt;=2)))' />
             <attribute name='custom' type='Long' value='42'/>
         </requirement>
-    <!-- 
-        <requirement namespace='osgi.identity'>
-            <directive name='effective' value='meta' />
-            <directive name='resolution' value='optional' />
-            <directive name='filter' value='(&amp;(version=1.5.6)(osgi.identity=org.acme.pool-src))' />
-            <directive name='classifier' value='sources' />
-        </requirement>
-    -->
     </resource>
 </repository>
 

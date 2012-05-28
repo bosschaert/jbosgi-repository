@@ -366,7 +366,6 @@ public class RepositoryTCKBasedTestCase {
         assertEquals("org.jboss.test.cases.repository.tb2", wiringCap.getAttributes().get("bundle-symbolic-name"));
         assertEquals("yes", wiringCap.getAttributes().get("approved"));
         assertEquals("org.jboss.test.cases.repository.tb1.pkg1", wiringCap.getDirectives().get("uses"));
-        // TODO enable assertEquals(1, resource.getCapabilities("osgi.foo.bar").size());
 
         // Read the requirements
         assertEquals(0, resource.getRequirements("org.osgi.nonexistent").size());
@@ -390,11 +389,12 @@ public class RepositoryTCKBasedTestCase {
         assertEquals(getSHA256(contentBytes), contentCap.getAttributes().get("osgi.content"));
         // The previous line fails sometimes (depending on the value of the SHA-256).
         // if the SHA contains bytes with a value < 16 the leading 0 is not added to the output
+        // for example:
         // expected:<04fe1203ebeff5c59c3795d52bff4a10a31a0bdbc4c6ec0334f78104bb1f2485>
         // but was: <4fe123ebeff5c59c3795d52bff4a10a31abdbc4c6ec334f7814bb1f2485>
     }
 
-    // Fails in RI, no List<> types accepted, currently commented out in content1.xml
+    @Test
     public void testAttributeDataTypes() throws Exception {
         Requirement req = new RequirementImpl("osgi.test.namespace", "(osgi.test.namespace=a testing namespace)");
         Map<Requirement, Collection<Capability>> result = findProvidersAllRepos(req);
