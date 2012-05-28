@@ -175,7 +175,7 @@ public class RepositoryTCKBasedTestCase {
     @Test
     public void testQueryByBundleID() throws Exception {
         Requirement requirement = new RequirementImpl("osgi.wiring.bundle",
-                "(&(osgi.wiring.bundle=org.osgi.test.cases.repository.tb1)(bundle-version=1.0.0.test))");
+                "(&(osgi.wiring.bundle=org.jboss.test.cases.repository.tb1)(bundle-version=1.0.0.test))");
 
         Map<Requirement, Collection<Capability>> result = findProvidersAllRepos(requirement);
         assertEquals(1, result.size());
@@ -187,14 +187,14 @@ public class RepositoryTCKBasedTestCase {
         Capability capability = matchingCapabilities.iterator().next();
 
         assertEquals(requirement.getNamespace(), capability.getNamespace());
-        assertEquals("org.osgi.test.cases.repository.tb1", capability.getAttributes().get("osgi.wiring.bundle"));
+        assertEquals("org.jboss.test.cases.repository.tb1", capability.getAttributes().get("osgi.wiring.bundle"));
         assertEquals(Version.parseVersion("1.0.0.test"), capability.getAttributes().get("bundle-version"));
     }
 
     @Test
     public void testQueryNoMatch() throws Exception {
         Requirement requirement = new RequirementImpl("osgi.wiring.bundle",
-                "(&(osgi.wiring.bundle=org.osgi.test.cases.repository.tb1)(foo=bar))");
+                "(&(osgi.wiring.bundle=org.jboss.test.cases.repository.tb1)(foo=bar))");
 
         Map<Requirement, Collection<Capability>> result = findProvidersAllRepos(requirement);
         assertEquals(1, result.size());
@@ -214,9 +214,9 @@ public class RepositoryTCKBasedTestCase {
 
         boolean foundtb1 = false, foundtb2 = false;
         for (Capability cap : matches) {
-            if (cap.getAttributes().get("osgi.wiring.bundle").equals("org.osgi.test.cases.repository.tb1")) {
+            if (cap.getAttributes().get("osgi.wiring.bundle").equals("org.jboss.test.cases.repository.tb1")) {
                 foundtb1 = true;
-            } else if (cap.getAttributes().get("osgi.wiring.bundle").equals("org.osgi.test.cases.repository.tb2")) {
+            } else if (cap.getAttributes().get("osgi.wiring.bundle").equals("org.jboss.test.cases.repository.tb2")) {
                 foundtb2 = true;
             }
         }
@@ -236,14 +236,14 @@ public class RepositoryTCKBasedTestCase {
         assertEquals(1, matches.size());
         Capability capability = matches.iterator().next();
         assertEquals("osgi.identity", capability.getNamespace());
-        assertEquals("org.osgi.test.cases.repository.tb2", capability.getAttributes().get("osgi.identity"));
+        assertEquals("org.jboss.test.cases.repository.tb2", capability.getAttributes().get("osgi.identity"));
     }
 
     public void testDisconnectedQueries() throws Exception {
         Requirement req1 = new RequirementImpl("osgi.wiring.bundle",
-                "(osgi.wiring.bundle=org.osgi.test.cases.repository.tb1)");
+                "(osgi.wiring.bundle=org.jboss.test.cases.repository.tb1)");
         Requirement req2 = new RequirementImpl("osgi.wiring.bundle",
-                "(osgi.wiring.bundle=org.osgi.test.cases.repository.tb2)");
+                "(osgi.wiring.bundle=org.jboss.test.cases.repository.tb2)");
 
         Map<Requirement, Collection<Capability>> result = findProvidersAllRepos(req1, req2);
         assertEquals(2, result.size());
@@ -251,18 +251,18 @@ public class RepositoryTCKBasedTestCase {
         Collection<Capability> match1 = result.get(req1);
         assertEquals(1, match1.size());
         Capability cap1 = match1.iterator().next();
-        assertEquals("org.osgi.test.cases.repository.tb1", cap1.getAttributes().get("osgi.wiring.bundle"));
+        assertEquals("org.jboss.test.cases.repository.tb1", cap1.getAttributes().get("osgi.wiring.bundle"));
 
         Collection<Capability> match2 = result.get(req2);
         assertEquals(1, match2.size());
         Capability cap2 = match2.iterator().next();
-        assertEquals("org.osgi.test.cases.repository.tb2", cap2.getAttributes().get("osgi.wiring.bundle"));
+        assertEquals("org.jboss.test.cases.repository.tb2", cap2.getAttributes().get("osgi.wiring.bundle"));
     }
 
     // Fails in RI
     public void testComplexQuery() throws Exception {
         Requirement req = new RequirementImpl("osgi.wiring.package",
-                "(|(osgi.wiring.package=org.osgi.test.cases.repository.tb1.pkg1)(osgi.wiring.package=org.osgi.test.cases.repository.tb2))");
+                "(|(osgi.wiring.package=org.jboss.test.cases.repository.tb1.pkg1)(osgi.wiring.package=org.jboss.test.cases.repository.tb2))");
         Map<Requirement, Collection<Capability>> result = findProvidersAllRepos(req);
 
         assertEquals(1, result.size());
@@ -271,9 +271,9 @@ public class RepositoryTCKBasedTestCase {
 
         boolean foundtb1 = false, foundtb2 = false;
         for (Capability cap : matches) {
-            if (cap.getAttributes().get("bundle-symbolic-name").equals("org.osgi.test.cases.repository.tb1")) {
+            if (cap.getAttributes().get("bundle-symbolic-name").equals("org.jboss.test.cases.repository.tb1")) {
                 foundtb1 = true;
-            } else if (cap.getAttributes().get("bundle-symbolic-name").equals("org.osgi.test.cases.repository.tb2")) {
+            } else if (cap.getAttributes().get("bundle-symbolic-name").equals("org.jboss.test.cases.repository.tb2")) {
                 foundtb2 = true;
             }
         }
@@ -285,19 +285,19 @@ public class RepositoryTCKBasedTestCase {
     // Fails in RI
     public void testComplexQueryWithCustomAttributeSpecificValue() throws Exception {
         Requirement req = new RequirementImpl("osgi.wiring.package",
-                "(&(|(osgi.wiring.package=org.osgi.test.cases.repository.tb1.pkg1)(osgi.wiring.package=org.osgi.test.cases.repository.tb2))(approved=yes))");
+                "(&(|(osgi.wiring.package=org.jboss.test.cases.repository.tb1.pkg1)(osgi.wiring.package=org.jboss.test.cases.repository.tb2))(approved=yes))");
         Map<Requirement, Collection<Capability>> result = findProvidersAllRepos(req);
         assertEquals(1, result.size());
         Collection<Capability> matches = result.get(req);
         assertEquals(1, matches.size());
         Capability capability = matches.iterator().next();
-        assertEquals("org.osgi.test.cases.repository.tb2", capability.getAttributes().get("bundle-symbolic-name"));
+        assertEquals("org.jboss.test.cases.repository.tb2", capability.getAttributes().get("bundle-symbolic-name"));
     }
 
     // Fails in RI
     public void testComplexQueryWithCustomAttributeDefined() throws Exception {
         Requirement req = new RequirementImpl("osgi.wiring.package",
-                "(&(|(osgi.wiring.package=org.osgi.test.cases.repository.tb1.pkg1)(osgi.wiring.package=org.osgi.test.cases.repository.tb2))(approved=*))");
+                "(&(|(osgi.wiring.package=org.jboss.test.cases.repository.tb1.pkg1)(osgi.wiring.package=org.jboss.test.cases.repository.tb2))(approved=*))");
         Map<Requirement, Collection<Capability>> result = findProvidersAllRepos(req);
 
         assertEquals(1, result.size());
@@ -306,9 +306,9 @@ public class RepositoryTCKBasedTestCase {
 
         boolean foundtb1 = false, foundtb2 = false;
         for (Capability cap : matches) {
-            if (cap.getAttributes().get("bundle-symbolic-name").equals("org.osgi.test.cases.repository.tb1")) {
+            if (cap.getAttributes().get("bundle-symbolic-name").equals("org.jboss.test.cases.repository.tb1")) {
                 foundtb1 = true;
-            } else if (cap.getAttributes().get("bundle-symbolic-name").equals("org.osgi.test.cases.repository.tb2")) {
+            } else if (cap.getAttributes().get("bundle-symbolic-name").equals("org.jboss.test.cases.repository.tb2")) {
                 foundtb2 = true;
             }
         }
@@ -337,13 +337,13 @@ public class RepositoryTCKBasedTestCase {
 
     // TODO fails sometimes on the SHA computation
     public void testRepositoryContent() throws Exception {
-        Requirement req = new RequirementImpl("osgi.identity", "(osgi.identity=org.osgi.test.cases.repository.tb2)");
+        Requirement req = new RequirementImpl("osgi.identity", "(osgi.identity=org.jboss.test.cases.repository.tb2)");
         Map<Requirement, Collection<Capability>> result = findProvidersAllRepos(req);
         assertEquals(1, result.size());
         Collection<Capability> matches = result.get(req);
         assertEquals(1, matches.size());
         Capability capability = matches.iterator().next();
-        assertEquals("org.osgi.test.cases.repository.tb2", capability.getAttributes().get("osgi.identity"));
+        assertEquals("org.jboss.test.cases.repository.tb2", capability.getAttributes().get("osgi.identity"));
 
         Resource resource = capability.getResource();
 
@@ -351,7 +351,7 @@ public class RepositoryTCKBasedTestCase {
         List<Capability> identityCaps = resource.getCapabilities("osgi.identity");
         assertEquals(1, identityCaps.size());
         Capability identityCap = identityCaps.iterator().next();
-        assertEquals("org.osgi.test.cases.repository.tb2", identityCap.getAttributes().get("osgi.identity"));
+        assertEquals("org.jboss.test.cases.repository.tb2", identityCap.getAttributes().get("osgi.identity"));
         assertEquals(Version.parseVersion("1"), identityCap.getAttributes().get("version"));
         assertEquals("osgi.bundle", identityCap.getAttributes().get("type"));
         assertEquals("http://www.opensource.org/licenses/Apache-2.0", identityCap.getAttributes().get("license"));
@@ -366,12 +366,12 @@ public class RepositoryTCKBasedTestCase {
         List<Capability> wiringCaps = resource.getCapabilities("osgi.wiring.package");
         assertEquals(1, wiringCaps.size());
         Capability wiringCap = wiringCaps.iterator().next();
-        assertEquals("org.osgi.test.cases.repository.tb2", wiringCap.getAttributes().get("osgi.wiring.package"));
+        assertEquals("org.jboss.test.cases.repository.tb2", wiringCap.getAttributes().get("osgi.wiring.package"));
         assertEquals(Version.parseVersion("1.2.3.qualified"), wiringCap.getAttributes().get("version"));
         assertEquals(Version.parseVersion("1"), wiringCap.getAttributes().get("bundle-version"));
-        assertEquals("org.osgi.test.cases.repository.tb2", wiringCap.getAttributes().get("bundle-symbolic-name"));
+        assertEquals("org.jboss.test.cases.repository.tb2", wiringCap.getAttributes().get("bundle-symbolic-name"));
         assertEquals("yes", wiringCap.getAttributes().get("approved"));
-        assertEquals("org.osgi.test.cases.repository.tb1.pkg1", wiringCap.getDirectives().get("uses"));
+        assertEquals("org.jboss.test.cases.repository.tb1.pkg1", wiringCap.getDirectives().get("uses"));
         // TODO enable assertEquals(1, resource.getCapabilities("osgi.foo.bar").size());
 
         // Read the requirements
@@ -381,7 +381,7 @@ public class RepositoryTCKBasedTestCase {
         Requirement wiringReq = wiringReqs.iterator().next();
         assertEquals(2, wiringReq.getDirectives().size());
         assertEquals("custom directive", wiringReq.getDirectives().get("custom"));
-        assertEquals("(&(osgi.wiring.package=org.osgi.test.cases.repository.tb1.pkg1)(version>=1.1)(!(version>=2)))",
+        assertEquals("(&(osgi.wiring.package=org.jboss.test.cases.repository.tb1.pkg1)(version>=1.1)(!(version>=2)))",
                 wiringReq.getDirectives().get("filter"));
         assertEquals(1, wiringReq.getAttributes().size());
         assertEquals(new Long(42), wiringReq.getAttributes().get("custom"));
