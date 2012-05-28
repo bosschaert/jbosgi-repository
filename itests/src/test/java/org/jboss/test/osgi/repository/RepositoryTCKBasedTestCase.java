@@ -58,7 +58,6 @@ import org.jboss.test.osgi.repository.tb1.pkg2.TestInterface2;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Version;
 import org.osgi.resource.Capability;
@@ -132,10 +131,8 @@ public class RepositoryTCKBasedTestCase {
         RepositoryStorage rs = xpr.getRepositoryStorage();
 
         URL xmlURL = getClass().getResource("/xml/test-repository1.xml");
-        System.out.println("^^^ " + xmlURL);
         String xml = new String(readFully(xmlURL.openStream()));
         xml = fillInTemplate(xml, "tb1");
-        System.out.println("***" + xml);
 
         ByteArrayInputStream bais = new ByteArrayInputStream(xml.getBytes());
         RepositoryReader reader = RepositoryXMLReader.create(bais);
@@ -145,17 +142,6 @@ public class RepositoryTCKBasedTestCase {
             rs.addResource(resource);
             resource = reader.nextResource();
         }
-    }
-
-    @Test
-    public void testFoo() throws Exception {
-        for (Bundle b : context.getBundles()) {
-            System.out.println("$$$$ " + b.getSymbolicName());
-
-        }
-        System.out.println("*** " + getRepository());
-
-
     }
 
     @Test
@@ -177,6 +163,7 @@ public class RepositoryTCKBasedTestCase {
         assertEquals(Version.parseVersion("1.0.0.test"), capability.getAttributes().get("bundle-version"));
     }
 
+    @Test
     public void testQueryNoMatch() throws Exception {
         Requirement requirement = new RequirementImpl("osgi.wiring.bundle",
                 "(&(osgi.wiring.bundle=org.osgi.test.cases.repository.tb1)(foo=bar))");
