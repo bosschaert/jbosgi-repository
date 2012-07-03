@@ -15,7 +15,7 @@
     <parent>
         <groupId>org.jboss.osgi</groupId>
         <artifactId>jboss-osgi-parent</artifactId>
-        <version>1.0.18</version>
+        <version>1.0.19</version>
     </parent>
 
     <name>JBossOSGi Repository</name>
@@ -24,7 +24,7 @@
     <artifactId>jbosgi-repository-parent</artifactId>
     <packaging>pom</packaging>
 
-    <version>1.3.0.CR1</version>
+    <version>1.3.0.CR2-SNAPSHOT</version>
 
     <!-- Source -->
     <scm>

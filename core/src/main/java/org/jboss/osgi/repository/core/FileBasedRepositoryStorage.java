@@ -207,7 +207,12 @@ public class FileBasedRepositoryStorage extends MemoryRepositoryStorage {
             String contentPath = sha256.substring(0, 2) + File.separator + sha256.substring(2) + File.separator + "content";
             File targetFile = new File(storageDir.getAbsolutePath() + File.separator + contentPath);
             targetFile.getParentFile().mkdirs();
-            tempFile.renameTo(targetFile);
+
+            // Note that a simple renameTo() doesn't work properly on Windows, therefore we're copying the file
+            // to the target location.
+            copyResourceContent(new FileInputStream(tempFile), targetFile);
+            tempFile.delete();
+
             URL url = targetFile.toURI().toURL();
             return url;
         }
@@ -279,10 +284,13 @@ public class FileBasedRepositoryStorage extends MemoryRepositoryStorage {
     }
 
     private boolean deleteRecursive(File file) {
+        boolean result = true;
+
         if (file.isDirectory()) {
             for (File aux : file.listFiles())
-                return deleteRecursive(aux);
+                result &= deleteRecursive(aux);
         }
-        return file.delete();
+        result &= file.delete();
+        return result;
     }
 }
