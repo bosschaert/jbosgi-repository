@@ -100,16 +100,11 @@ public class FileBasedRepositoryStorageTestCase extends AbstractRepositoryTest {
         verifyResource(resource);
         verifyProviders(storage);
 
-        boolean deleted = storage.removeResource(resource);
-        if (File.separatorChar != '\\') // remove this line when JBOSGI-579 is fixed
-            // The delete operation doesn't succeed on Windows - is there still a file handle open on the 'content' file?
-            Assert.assertTrue(deleted);
+        Assert.assertTrue(storage.removeResource(resource));
 
         XCapability ccap = (XCapability) resource.getCapabilities(ContentNamespace.CONTENT_NAMESPACE).get(0);
         URL fileURL = new URL((String) ccap.getAttribute(ContentNamespace.CAPABILITY_URL_ATTRIBUTE));
-        if (File.separatorChar != '\\') // remove this line when JBOSGI-579 is fixed
-            // The delete operation doesn't succeed on Windows - is there still a file handle open on the 'content' file?
-            Assert.assertFalse("File removed: " + fileURL, new File(fileURL.getPath()).exists());
+        Assert.assertFalse("File removed: " + fileURL, new File(fileURL.getPath()).exists());
     }
 
     @Test
@@ -181,6 +176,7 @@ public class FileBasedRepositoryStorageTestCase extends AbstractRepositoryTest {
     private void verifyResource(XResource resource) throws Exception {
         InputStream input = ((RepositoryContent)resource).getContent();
         Assert.assertNotNull("RepositoryContent not null", input);
+        input.close();
 
         XCapability ccap = (XCapability) resource.getCapabilities(ContentNamespace.CONTENT_NAMESPACE).get(0);
         Assert.assertEquals("application/vnd.osgi.bundle", ccap.getAttribute(ContentNamespace.CAPABILITY_MIME_ATTRIBUTE));

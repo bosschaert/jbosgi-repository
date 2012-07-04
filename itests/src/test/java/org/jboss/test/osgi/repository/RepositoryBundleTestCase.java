@@ -133,7 +133,6 @@ public class RepositoryBundleTestCase {
         Assert.assertNull("One resource only", reader.nextResource());
     }
 
-
     @Test
     public void testRepositoryRestart() throws Exception {
 

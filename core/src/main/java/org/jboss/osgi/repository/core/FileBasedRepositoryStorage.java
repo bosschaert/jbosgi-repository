@@ -237,21 +237,25 @@ public class FileBasedRepositoryStorage extends MemoryRepositoryStorage {
         MessageDigest md = MessageDigest.getInstance(algorithm);
         FileInputStream fis = new FileInputStream(sourceFile);
 
-        int nread = 0;
-        byte[] dataBytes = new byte[1024];
-        while ((nread = fis.read(dataBytes)) != -1) {
-            md.update(dataBytes, 0, nread);
-        }
-        ;
-        byte[] mdbytes = md.digest();
+        try {
+            int nread = 0;
+            byte[] dataBytes = new byte[1024];
+            while ((nread = fis.read(dataBytes)) != -1) {
+                md.update(dataBytes, 0, nread);
+            }
+            ;
+            byte[] mdbytes = md.digest();
 
-        // Convert the byte to hex format method 2
-        StringBuffer result = new StringBuffer();
-        for (int i = 0; i < mdbytes.length; i++) {
-            result.append(Integer.toHexString(0xFF & mdbytes[i]));
-        }
+            // Convert the byte to hex format method 2
+            StringBuffer result = new StringBuffer();
+            for (int i = 0; i < mdbytes.length; i++) {
+                result.append(Integer.toHexString(0xFF & mdbytes[i]));
+            }
 
-        return result.toString();
+            return result.toString();
+        } finally {
+            fis.close();
+        }
     }
 
     private URL getBaseURL() {
