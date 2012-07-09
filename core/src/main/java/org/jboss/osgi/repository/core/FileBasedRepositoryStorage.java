@@ -52,6 +52,7 @@ import org.jboss.osgi.resolver.XResource;
 import org.jboss.osgi.resolver.XResourceBuilder;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;
+import org.osgi.resource.Resource;
 import org.osgi.service.repository.ContentNamespace;
 import org.osgi.service.repository.RepositoryContent;
 
@@ -114,7 +115,7 @@ public class FileBasedRepositoryStorage extends MemoryRepositoryStorage {
             throw MESSAGES.storageCannotObtainContentCapablility(res);
 
         XCapability ccap = (XCapability) ccaps.get(0);
-        String contentURL = (String)ccap.getAttribute(ContentNamespace.CAPABILITY_URL_ATTRIBUTE);
+        String contentURL = (String) ccap.getAttribute(ContentNamespace.CAPABILITY_URL_ATTRIBUTE);
         if (contentURL == null)
             throw MESSAGES.storageCannotObtainContentURL(res);
 
@@ -122,22 +123,10 @@ public class FileBasedRepositoryStorage extends MemoryRepositoryStorage {
 
         // Copy the resource to this storage, if the content URL does not match
         if (contentURL.startsWith(getBaseURL().toExternalForm()) == false) {
-            InputStream input;
-            if (res instanceof RepositoryContent) {
-                input = ((RepositoryContent) res).getContent();
-            } else {
-                try {
-                    input = new URL(contentURL).openStream();
-                } catch (IOException ex) {
-                    throw MESSAGES.storageCannotAccessContentURL(ex, contentURL);
-                }
-            }
-            String mime = (String) ccap.getAttribute(ContentNamespace.CAPABILITY_MIME_ATTRIBUTE);
-            XResourceBuilder builder = createResourceInternal(input, mime, false);
+            XResourceBuilder builder = createResourceInternal(res, false);
             for (Capability cap : res.getCapabilities(null)) {
-                String namespace = cap.getNamespace();
-                if (!namespace.equals(ContentNamespace.CONTENT_NAMESPACE)) {
-                    builder.addCapability(namespace, cap.getAttributes(), cap.getDirectives());
+                if (!ContentNamespace.CONTENT_NAMESPACE.equals(cap.getNamespace())) {
+                    builder.addCapability(cap.getNamespace(), cap.getAttributes(), cap.getDirectives());
                 }
             }
             for (Requirement req : res.getRequirements(null)) {
@@ -175,19 +164,60 @@ public class FileBasedRepositoryStorage extends MemoryRepositoryStorage {
         return result;
     }
 
-    private XResourceBuilder createResourceInternal(InputStream input, String mime, boolean loadMetadata) {
+    private XResourceBuilder createResourceInternal(XResource resource, boolean loadMetadata) {
+        XResourceBuilder factory = null;
+        for (Capability cap : resource.getCapabilities(ContentNamespace.CONTENT_NAMESPACE)) {
+            XCapability ccap = (XCapability)cap;
+            Map<String, Object> contentAtts = new HashMap<String, Object>();
+            String mimeType = (String) ccap.getAttribute(ContentNamespace.CAPABILITY_MIME_ATTRIBUTE);
+            if (mimeType != null) {
+                contentAtts.put(ContentNamespace.CAPABILITY_MIME_ATTRIBUTE, mimeType);
+            }
+            InputStream input = getResourceContent(ccap);
+            try {
+                URL contentURL = addResourceContent(input, contentAtts);
+                if (factory == null) {
+                    factory = URLResourceBuilderFactory.create(contentURL, contentAtts, loadMetadata);
+                } else {
+                    factory.addCapability(ContentNamespace.CONTENT_NAMESPACE, contentAtts, null);
+                }
+            } catch (IOException ex) {
+                throw MESSAGES.storageCannotAddResourceToStorage(ex, mimeType);
+            } 
+        }
+        return factory;
+    }
+
+    private InputStream getResourceContent(XCapability ccap) {
+        InputStream input;
+        Resource resource = ccap.getResource();
+        Capability defaultContent = resource.getCapabilities(ContentNamespace.CONTENT_NAMESPACE).get(0);
+        if (defaultContent == ccap && resource instanceof RepositoryContent) {
+            input = ((RepositoryContent) resource).getContent();
+        } else {
+            String contentURL = (String) ccap.getAttribute(ContentNamespace.CAPABILITY_URL_ATTRIBUTE);
+            try {
+                input = new URL(contentURL).openStream();
+            } catch (IOException ex) {
+                throw MESSAGES.storageCannotAccessContentURL(ex, contentURL);
+            }
+        }
+        return input;
+    }
+    
+    private XResourceBuilder createResourceInternal(InputStream input, String mimeType, boolean loadMetadata) {
         Map<String, Object> contentAtts = new HashMap<String, Object>();
-        if (mime != null) {
-            contentAtts.put(ContentNamespace.CAPABILITY_MIME_ATTRIBUTE, mime);
+        if (mimeType != null) {
+            contentAtts.put(ContentNamespace.CAPABILITY_MIME_ATTRIBUTE, mimeType);
         }
         try {
             URL contentURL = addResourceContent(input, contentAtts);
             return URLResourceBuilderFactory.create(contentURL, contentAtts, loadMetadata);
         } catch (IOException ex) {
-            throw MESSAGES.storageCannotAddResourceToStorage(ex, mime);
+            throw MESSAGES.storageCannotAddResourceToStorage(ex, mimeType);
         }
     }
-
+    
     private URL addResourceContent(InputStream input, Map<String, Object> atts) throws IOException {
         synchronized (storageDir) {
             // Copy the input stream to temporary storage
@@ -195,8 +225,8 @@ public class FileBasedRepositoryStorage extends MemoryRepositoryStorage {
             Long size = copyResourceContent(input, tempFile);
             atts.put(ContentNamespace.CAPABILITY_SIZE_ATTRIBUTE, size);
             // Calculate the SHA-256
-            String algorithm = "SHA-256";
             String sha256;
+            String algorithm = RepositoryContentHelper.DEFAULT_DIGEST_ALGORITHM;
             try {
                 sha256 = RepositoryContentHelper.getDigest(new FileInputStream(tempFile), algorithm);
                 atts.put(ContentNamespace.CONTENT_NAMESPACE, sha256);
@@ -209,6 +239,7 @@ public class FileBasedRepositoryStorage extends MemoryRepositoryStorage {
             targetFile.getParentFile().mkdirs();
             tempFile.renameTo(targetFile);
             URL url = targetFile.toURI().toURL();
+            atts.put(ContentNamespace.CAPABILITY_URL_ATTRIBUTE, url.toExternalForm());
             return url;
         }
     }
@@ -258,10 +289,12 @@ public class FileBasedRepositoryStorage extends MemoryRepositoryStorage {
     }
 
     private boolean deleteRecursive(File file) {
+        boolean result = true;
         if (file.isDirectory()) {
             for (File aux : file.listFiles())
-                return deleteRecursive(aux);
+                result &= deleteRecursive(aux);
         }
-        return file.delete();
+        result &= file.delete();
+        return result;
     }
 }
