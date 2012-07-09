@@ -36,11 +36,24 @@ import org.osgi.service.repository.Repository;
 import org.osgi.util.tracker.ServiceTracker;
 
 /**
- * Integration with the OSGi TCK.
+ * Integration with the OSGi TCK. It implements an integration protocol as specified by the Repository CT:<p/>
  *
+ *   As the Repository spec doesn't specify how the Repository is primed with information, a Repository implementation
+ *   must supply an integration bundle which primes the repository with information as expected by this test case.
+ *   This process works as follows:<ul>
+ *   <li>The test registers a String service which holds the Repository XML that contains the expected content.</li>
+ *   <li>The service has the property REPOSITORY_XML_KEY set to the name of this class.</li>
+ *   <li>The integration bundle must listen to this service and register one or more Repository service implementations
+ *   that serve the information as specified in the XML.</li>
+ *   <li>When the integration bundle is finished with its setup it must register a service with the property
+ *   REPOSITORY_POPULATED_KEY set to the name of this test class.
+ *   The service object or registration class are ignored by the test.</li>
+ *   <li>The test waits for this service to appear and runs the tests when it does.</li>
+ *   </ul>
  * @author David Bosschaert
  */
 public class Activator implements BundleActivator {
+    private static final String REPOSITORY_POPULATED_KEY = "repository-populated";
     private static final String TEST_CLASS_NAME = "org.osgi.test.cases.repository.junit.RepositoryTest";
 
     private ServiceTracker serviceTracker;
@@ -48,8 +61,6 @@ public class Activator implements BundleActivator {
 
     @Override
     public void start(final BundleContext context) throws Exception {
-        System.err.println("********* in the integration bundle");
-
         Filter filter = context.createFilter(
                 "(&(objectClass=java.lang.String)(repository-xml=" + TEST_CLASS_NAME + "))");
         serviceTracker = new ServiceTracker(context, filter, null) {
@@ -72,7 +83,6 @@ public class Activator implements BundleActivator {
                 return;
         }
 
-        System.err.println("*********** priming from: " + xml);
         ServiceTracker st = new ServiceTracker(context, Repository.class.getName(), null);
         st.open();
 
@@ -82,7 +92,6 @@ public class Activator implements BundleActivator {
                 throw new IllegalStateException("Unable to find service: " + RepositoryStorage.class);
             XPersistentRepository xpr = (XPersistentRepository) rep;
             RepositoryStorage rs = xpr.getRepositoryStorage();
-            System.err.println("*********** obtained Repository Storage: " + rs);
 
             RepositoryReader reader = RepositoryXMLReader.create(new ByteArrayInputStream(xml.getBytes()));
             XResource resource = reader.nextResource();
@@ -92,12 +101,10 @@ public class Activator implements BundleActivator {
             }
 
             Hashtable<String, Object> props = new Hashtable<String, Object>();
-            props.put("repository-populated", TEST_CLASS_NAME);
+            props.put(REPOSITORY_POPULATED_KEY, TEST_CLASS_NAME);
             synchronized (this) {
                 servicePrimedRegistration = context.registerService(Object.class.getName(), new Object(), props);
             }
-
-            System.err.println("*********** finished priming repository storage: " + rs);
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
             throw new IllegalStateException(ex);
