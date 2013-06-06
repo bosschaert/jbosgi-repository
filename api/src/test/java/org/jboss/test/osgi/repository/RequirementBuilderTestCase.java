@@ -1,4 +1,3 @@
-
 /*
  * #%L
  * JBossOSGi Repository
@@ -24,7 +23,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jboss.osgi.repository.spi.RequirementBuilderImpl;
+import org.jboss.osgi.repository.impl.RequirementBuilderImpl;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;

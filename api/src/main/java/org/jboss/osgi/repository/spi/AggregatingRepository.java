@@ -37,6 +37,7 @@ import org.osgi.service.repository.RequirementExpression;
  * A {@link XRepository} that aggregates other repositories.
  *
  * @author thomas.diesler@jboss.com
+ * @author David Bosschaert
  * @since 11-May-2012
  */
 public class AggregatingRepository extends AbstractRepository {
@@ -76,17 +77,40 @@ public class AggregatingRepository extends AbstractRepository {
     }
 
     @Override
-    public Collection<Resource> findProviders(RequirementExpression requirementExpression) {
-        return null;
+    public Collection<Resource> findProviders(RequirementExpression re) {
+        Collection<Resource> providers = new ArrayList<Resource>();
+        LOGGER.debugf("Find providers for: %s", re);
+        synchronized (repositories) {
+            for (XRepository repo : repositories) {
+                Collection<Resource> resources = repo.findProviders(re);
+                LOGGER.debugf("Found providers in %s: %s", repo, resources);
+                providers.addAll(resources);
+            }
+        }
+        return providers;
     }
 
     @Override
     public ExpressionCombiner getExpressionCombiner() {
+        synchronized (repositories) {
+            for (XRepository repo : repositories) {
+                ExpressionCombiner ec = repo.getExpressionCombiner();
+                if (ec != null)
+                    return ec;
+            }
+        }
         return null;
     }
 
     @Override
     public RequirementBuilder newRequirementBuilder(String namespace) {
+        synchronized (repositories) {
+            for (XRepository repo : repositories) {
+                RequirementBuilder rb = repo.newRequirementBuilder(namespace);
+                if (rb != null)
+                    return rb;
+            }
+        }
         return null;
     }
 }

@@ -39,6 +39,7 @@ import org.jboss.osgi.repository.RepositoryStorage;
 import org.jboss.osgi.repository.RepositoryStorageFactory;
 import org.jboss.osgi.repository.XPersistentRepository;
 import org.jboss.osgi.repository.XRepository;
+import org.jboss.osgi.repository.impl.RequirementBuilderImpl;
 import org.jboss.osgi.repository.spi.AbstractPersistentRepository;
 import org.jboss.osgi.repository.spi.FileBasedRepositoryStorage;
 import org.jboss.osgi.repository.spi.MavenDelegateRepository;
@@ -56,13 +57,16 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
 import org.osgi.framework.namespace.IdentityNamespace;
 import org.osgi.resource.Capability;
+import org.osgi.resource.Requirement;
 import org.osgi.service.repository.ContentNamespace;
 import org.osgi.service.repository.RepositoryContent;
+import org.osgi.service.repository.RequirementBuilder;
 
 /**
  * Test the {@link AbstractPersistentRepository}
  *
  * @author thomas.diesler@jboss.com
+ * @author David Bosschaert
  * @since 16-Jan-2012
  */
 public class PersistentRepositoryTestCase extends AbstractRepositoryTest {
@@ -141,5 +145,12 @@ public class PersistentRepositoryTestCase extends AbstractRepositoryTest {
         OSGiMetaData metaData = OSGiMetaDataBuilder.load(manifest);
         assertEquals("org.apache.felix.configadmin", metaData.getBundleSymbolicName());
         assertEquals(Version.parseVersion("1.2.8"), metaData.getBundleVersion());
+    }
+
+    @Test public void testGetRequirementBuilder() {
+        RequirementBuilder builder = repository.newRequirementBuilder("toastie");
+        Assert.assertTrue(builder instanceof RequirementBuilderImpl);
+        Requirement req = builder.build();
+        Assert.assertEquals("toastie", req.getNamespace());
     }
 }

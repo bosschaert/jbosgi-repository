@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package org.jboss.osgi.repository.spi;
+package org.jboss.osgi.repository.impl;
 
 import java.util.Collections;
 import java.util.HashMap;

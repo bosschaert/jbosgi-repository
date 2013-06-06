@@ -33,6 +33,7 @@ import java.util.List;
 
 import org.jboss.osgi.repository.URLResourceBuilderFactory;
 import org.jboss.osgi.repository.XRepository;
+import org.jboss.osgi.repository.impl.RequirementBuilderImpl;
 import org.jboss.osgi.resolver.MavenCoordinates;
 import org.jboss.osgi.resolver.XCapability;
 import org.jboss.osgi.resolver.XRequirement;
@@ -185,8 +186,7 @@ public class MavenDelegateRepository extends AbstractRepository implements XRepo
 
     @Override
     public RequirementBuilder newRequirementBuilder(String namespace) {
-        // TODO Auto-generated method stub
-        return null;
+        return new RequirementBuilderImpl(namespace);
     }
 
     private static URL getBaseURL(String urlspec) {

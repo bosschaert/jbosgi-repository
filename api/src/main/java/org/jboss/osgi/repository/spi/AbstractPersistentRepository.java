@@ -27,6 +27,8 @@ import org.jboss.osgi.repository.RepositoryStorage;
 import org.jboss.osgi.repository.RepositoryStorageFactory;
 import org.jboss.osgi.repository.XPersistentRepository;
 import org.jboss.osgi.repository.XRepository;
+import org.jboss.osgi.repository.impl.ExpressionCombinerImpl;
+import org.jboss.osgi.repository.impl.RequirementBuilderImpl;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;
 import org.osgi.resource.Resource;
@@ -82,8 +84,7 @@ public class AbstractPersistentRepository extends AbstractRepository implements 
 
     @Override
     public ExpressionCombiner getExpressionCombiner() {
-        // TODO Auto-generated method stub
-        return null;
+        return new ExpressionCombinerImpl();
     }
 
     @Override
