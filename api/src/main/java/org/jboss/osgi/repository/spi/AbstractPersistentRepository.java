@@ -22,12 +22,17 @@ package org.jboss.osgi.repository.spi;
 import static org.jboss.osgi.repository.RepositoryMessages.MESSAGES;
 
 import java.util.Collection;
+
 import org.jboss.osgi.repository.RepositoryStorage;
 import org.jboss.osgi.repository.RepositoryStorageFactory;
 import org.jboss.osgi.repository.XPersistentRepository;
 import org.jboss.osgi.repository.XRepository;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;
+import org.osgi.resource.Resource;
+import org.osgi.service.repository.ExpressionCombiner;
+import org.osgi.service.repository.RequirementBuilder;
+import org.osgi.service.repository.RequirementExpression;
 
 /**
  * A {@link XRepository} that delegates to {@link RepositoryStorage}.
@@ -69,4 +74,20 @@ public class AbstractPersistentRepository extends AbstractRepository implements 
         return providers;
     }
 
+    @Override
+    public Collection<Resource> findProviders(RequirementExpression requirementExpression) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public ExpressionCombiner getExpressionCombiner() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public RequirementBuilder newRequirementBuilder(String namespace) {
+        return new RequirementBuilderImpl(namespace);
+    }
 }

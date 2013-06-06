@@ -33,7 +33,6 @@ import java.util.List;
 
 import org.jboss.osgi.repository.URLResourceBuilderFactory;
 import org.jboss.osgi.repository.XRepository;
-import org.jboss.osgi.repository.spi.AbstractRepository;
 import org.jboss.osgi.resolver.MavenCoordinates;
 import org.jboss.osgi.resolver.XCapability;
 import org.jboss.osgi.resolver.XRequirement;
@@ -43,6 +42,10 @@ import org.jboss.osgi.resolver.spi.AbstractRequirement;
 import org.osgi.framework.Filter;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;
+import org.osgi.resource.Resource;
+import org.osgi.service.repository.ExpressionCombiner;
+import org.osgi.service.repository.RequirementBuilder;
+import org.osgi.service.repository.RequirementExpression;
 
 /**
  * A simple {@link XRepository} that delegates to a maven repositories.
@@ -166,6 +169,24 @@ public class MavenDelegateRepository extends AbstractRepository implements XRepo
             }
         }
         return result;
+    }
+
+    @Override
+    public Collection<Resource> findProviders(RequirementExpression requirementExpression) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public ExpressionCombiner getExpressionCombiner() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public RequirementBuilder newRequirementBuilder(String namespace) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     private static URL getBaseURL(String urlspec) {
