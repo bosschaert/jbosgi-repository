@@ -30,6 +30,8 @@ import org.junit.Test;
 import org.osgi.resource.Requirement;
 import org.osgi.service.repository.AndExpression;
 import org.osgi.service.repository.ExpressionCombiner;
+import org.osgi.service.repository.NotExpression;
+import org.osgi.service.repository.OrExpression;
 import org.osgi.service.repository.RequirementExpression;
 import org.osgi.service.repository.SimpleRequirementExpression;
 
@@ -77,7 +79,54 @@ public class ExpressionCombinerTestCase {
 
     @Test
     public void testExpressionCombinerNot() {
+        Requirement req = new RequirementBuilderImpl("ns").build();
+        ExpressionCombiner ec = new ExpressionCombinerImpl();
 
+        RequirementExpression e = ec.not(req);
+        NotExpression ne = (NotExpression) e;
+        SimpleRequirementExpression sr = (SimpleRequirementExpression) ne.getRequirement();
+        Assert.assertSame(req, sr.getRequirement());
+
+        RequirementExpression e2 = ec.not(e);
+        NotExpression ne2 = (NotExpression) e2;
+        Assert.assertSame(e, ne2.getRequirement());
+    }
+
+    @Test
+    public void testExpressionCombinerOr() {
+        Requirement req1 = new RequirementBuilderImpl("ns1").build();
+        Requirement req2 = new RequirementBuilderImpl("ns2").build();
+        ExpressionCombiner ec = new ExpressionCombinerImpl();
+
+        RequirementExpression a = ec.or(req1, req2);
+        OrExpression ae = (OrExpression) a;
+        Assert.assertEquals(2, ae.getRequirements().size());
+        List<Requirement> reqs = getSimpleRequirements(ae.getRequirements());
+        Assert.assertTrue(reqs.contains(req1));
+        Assert.assertTrue(reqs.contains(req2));
+
+        Requirement req3 = new RequirementBuilderImpl("ns3").build();
+        RequirementExpression aa = ec.or(a, ec.expression(req3));
+        OrExpression ae2 = (OrExpression) aa;
+        Assert.assertEquals(2, ae2.getRequirements().size());
+
+        boolean foundSimple = false;
+        boolean foundComplex = false;
+        for (RequirementExpression re : ae2.getRequirements()) {
+            if (re == a) {
+                foundComplex = true;
+                continue;
+            }
+            if (re instanceof SimpleRequirementExpression) {
+                if (((SimpleRequirementExpression) re).getRequirement() == req3) {
+                    foundSimple = true;
+                    continue;
+                }
+            }
+            Assert.fail("Not as expected " + re);
+        }
+        Assert.assertTrue(foundSimple);
+        Assert.assertTrue(foundComplex);
     }
 
     private List<Requirement> getSimpleRequirements(List<RequirementExpression> expressions) {
