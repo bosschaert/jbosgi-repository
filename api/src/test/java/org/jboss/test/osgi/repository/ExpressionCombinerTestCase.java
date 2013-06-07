@@ -19,6 +19,9 @@
  */
 package org.jboss.test.osgi.repository;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import junit.framework.Assert;
 
 import org.jboss.osgi.repository.impl.ExpressionCombinerImpl;
@@ -28,13 +31,14 @@ import org.osgi.resource.Requirement;
 import org.osgi.service.repository.AndExpression;
 import org.osgi.service.repository.ExpressionCombiner;
 import org.osgi.service.repository.RequirementExpression;
+import org.osgi.service.repository.SimpleRequirementExpression;
 
 /**
  * @author David Bosschaert
  */
 public class ExpressionCombinerTestCase {
     @Test
-    public void testExpressionCombiner() {
+    public void testExpressionCombinerAnd() {
         Requirement req1 = new RequirementBuilderImpl("ns1").build();
         Requirement req2 = new RequirementBuilderImpl("ns2").build();
         ExpressionCombiner ec = new ExpressionCombinerImpl();
@@ -43,7 +47,48 @@ public class ExpressionCombinerTestCase {
         Assert.assertTrue(a instanceof AndExpression);
         AndExpression ae = (AndExpression) a;
         Assert.assertEquals(2, ae.getRequirements().size());
-        Assert.assertTrue(ae.getRequirements().contains(req1));
-        Assert.assertTrue(ae.getRequirements().contains(req2));
+        List<Requirement> reqs = getSimpleRequirements(ae.getRequirements());
+        Assert.assertTrue(reqs.contains(req1));
+        Assert.assertTrue(reqs.contains(req2));
+
+        Requirement req3 = new RequirementBuilderImpl("ns3").build();
+        RequirementExpression aa = ec.and(a, ec.expression(req3));
+        AndExpression ae2 = (AndExpression) aa;
+        Assert.assertEquals(2, ae2.getRequirements().size());
+
+        boolean foundSimple = false;
+        boolean foundComplex = false;
+        for (RequirementExpression re : ae2.getRequirements()) {
+            if (re == a) {
+                foundComplex = true;
+                continue;
+            }
+            if (re instanceof SimpleRequirementExpression) {
+                if (((SimpleRequirementExpression) re).getRequirement() == req3) {
+                    foundSimple = true;
+                    continue;
+                }
+            }
+            Assert.fail("Not as expected " + re);
+        }
+        Assert.assertTrue(foundSimple);
+        Assert.assertTrue(foundComplex);
+    }
+
+    @Test
+    public void testExpressionCombinerNot() {
+
+    }
+
+    private List<Requirement> getSimpleRequirements(List<RequirementExpression> expressions) {
+        List<Requirement> l = new ArrayList<Requirement>();
+        for (RequirementExpression re : expressions) {
+            if (re instanceof SimpleRequirementExpression) {
+                l.add(((SimpleRequirementExpression) re).getRequirement());
+            } else {
+                throw new IllegalArgumentException("Not a simple requirement: " + re);
+            }
+        }
+        return l;
     }
 }
