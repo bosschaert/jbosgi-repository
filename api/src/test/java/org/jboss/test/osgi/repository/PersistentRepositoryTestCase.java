@@ -21,6 +21,7 @@ package org.jboss.test.osgi.repository;
  */
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,6 +40,7 @@ import org.jboss.osgi.repository.RepositoryStorage;
 import org.jboss.osgi.repository.RepositoryStorageFactory;
 import org.jboss.osgi.repository.XPersistentRepository;
 import org.jboss.osgi.repository.XRepository;
+import org.jboss.osgi.repository.impl.ExpressionCombinerImpl;
 import org.jboss.osgi.repository.impl.RequirementBuilderImpl;
 import org.jboss.osgi.repository.spi.AbstractPersistentRepository;
 import org.jboss.osgi.repository.spi.FileBasedRepositoryStorage;
@@ -58,9 +60,12 @@ import org.osgi.framework.Version;
 import org.osgi.framework.namespace.IdentityNamespace;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;
+import org.osgi.resource.Resource;
 import org.osgi.service.repository.ContentNamespace;
+import org.osgi.service.repository.ExpressionCombiner;
 import org.osgi.service.repository.RepositoryContent;
 import org.osgi.service.repository.RequirementBuilder;
+import org.osgi.service.repository.RequirementExpression;
 
 /**
  * Test the {@link AbstractPersistentRepository}
@@ -147,10 +152,49 @@ public class PersistentRepositoryTestCase extends AbstractRepositoryTest {
         assertEquals(Version.parseVersion("1.2.8"), metaData.getBundleVersion());
     }
 
-    @Test public void testGetRequirementBuilder() {
+    @Test
+    public void testGetRequirementBuilder() {
         RequirementBuilder builder = repository.newRequirementBuilder("toastie");
         Assert.assertTrue(builder instanceof RequirementBuilderImpl);
         Requirement req = builder.build();
         Assert.assertEquals("toastie", req.getNamespace());
+    }
+
+    @Test
+    public void testGetExpressionCombiner() {
+        Assert.assertTrue(repository.getExpressionCombiner() instanceof ExpressionCombiner);
+        Assert.assertTrue(repository.getExpressionCombiner() instanceof ExpressionCombinerImpl);
+    }
+
+    @Test
+    public void testFindSimpleRequirementExpression() throws Exception {
+        MavenCoordinates mavenid = MavenCoordinates.parse("org.apache.felix:org.apache.felix.configadmin:1.2.8");
+        XRequirement req = XRequirementBuilder.create(mavenid).getRequirement();
+
+        RequirementExpression re = repository.getExpressionCombiner().expression(req);
+        Collection<Resource> resources = repository.findProviders(re);
+        Assert.assertEquals(1, resources.size());
+        XResource res = (XResource) resources.iterator().next();
+        XIdentityCapability icap = res.getIdentityCapability();
+        assertEquals("org.apache.felix.configadmin", icap.getName());
+        assertEquals(Version.parseVersion("1.2.8"), icap.getVersion());
+    }
+
+    @Test
+    public void testFindOrRequirementExpression() throws Exception {
+        XRequirement req1 = XRequirementBuilder.create(MavenCoordinates.parse("org.apache.felix:org.apache.felix.configadmin:1.2.8")).getRequirement();
+        XRequirement req2 = XRequirementBuilder.create(MavenCoordinates.parse("org.apache.felix:org.apache.felix.configadmin:1.4.0")).getRequirement();
+        RequirementExpression re = repository.getExpressionCombiner().or(req1, req2);
+        Collection<Resource> resources = repository.findProviders(re);
+        Assert.assertEquals(2, resources.size());
+
+        for (Resource res : resources) {
+            XResource xres = (XResource) res;
+
+            XIdentityCapability icap = xres.getIdentityCapability();
+            assertEquals("org.apache.felix.configadmin", icap.getName());
+            assertTrue(Version.parseVersion("1.2.8").equals(icap.getVersion()) ||
+                       Version.parseVersion("1.4.0").equals(icap.getVersion()));
+        }
     }
 }

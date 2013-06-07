@@ -31,6 +31,7 @@ import junit.framework.Assert;
 import org.jboss.osgi.metadata.OSGiMetaData;
 import org.jboss.osgi.metadata.OSGiMetaDataBuilder;
 import org.jboss.osgi.repository.XRepository;
+import org.jboss.osgi.repository.impl.ExpressionCombinerImpl;
 import org.jboss.osgi.repository.impl.RequirementBuilderImpl;
 import org.jboss.osgi.repository.spi.MavenDelegateRepository;
 import org.jboss.osgi.resolver.MavenCoordinates;
@@ -45,6 +46,7 @@ import org.osgi.framework.Version;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;
 import org.osgi.service.repository.ContentNamespace;
+import org.osgi.service.repository.ExpressionCombiner;
 import org.osgi.service.repository.RepositoryContent;
 import org.osgi.service.repository.RequirementBuilder;
 
@@ -98,10 +100,17 @@ public class MavenDelegateRepositoryTestCase {
         assertEquals("No capability", 0, caps.size());
     }
 
-    @Test public void testGetRequirementBuilder() {
+    @Test
+    public void testGetRequirementBuilder() {
         RequirementBuilder builder = repository.newRequirementBuilder("toastie");
         Assert.assertTrue(builder instanceof RequirementBuilderImpl);
         Requirement req = builder.build();
         Assert.assertEquals("toastie", req.getNamespace());
+    }
+
+    @Test
+    public void testGetExpressionCombiner() {
+        Assert.assertTrue(repository.getExpressionCombiner() instanceof ExpressionCombiner);
+        Assert.assertTrue(repository.getExpressionCombiner() instanceof ExpressionCombinerImpl);
     }
 }

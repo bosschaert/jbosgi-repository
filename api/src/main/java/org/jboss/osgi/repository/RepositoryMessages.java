@@ -26,6 +26,7 @@ import org.jboss.logging.annotations.Cause;
 import org.jboss.logging.annotations.Message;
 import org.jboss.logging.annotations.MessageBundle;
 import org.jboss.osgi.resolver.XResource;
+import org.osgi.service.repository.RequirementExpression;
 
 /**
  * Logging Id ranges: 20500-20599
@@ -98,4 +99,10 @@ public interface RepositoryMessages {
 
     @Message(id = 20519, value = "Invalid maven resource: %s")
     RepositoryStorageException invalidMavenResource(@Cause Throwable cause, XResource res);
+
+    @Message(id = 20520, value = "Unsupported: not as top level operator: %s")
+    UnsupportedOperationException unsupportedExpression(RequirementExpression re);
+
+    @Message(id = 20522, value = "Malformed Requirement Expression: %s")
+    IllegalArgumentException malformedRequirementExpression(RequirementExpression re);
 }
