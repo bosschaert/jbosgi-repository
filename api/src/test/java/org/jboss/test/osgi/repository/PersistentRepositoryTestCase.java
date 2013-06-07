@@ -238,6 +238,42 @@ public class PersistentRepositoryTestCase extends AbstractRepositoryTest {
         assertEquals(Version.parseVersion("1.1"), icap.getVersion());
     }
 
+    @Test
+    public void testFindAndNotRequirementExpression() throws Exception {
+        RepositoryStorage storage = repository.getRepositoryStorage();
+
+        XResourceBuilder<XResource> rbf1 = getXResourceBuilder();
+        Map<String, Object> atts1 = new HashMap<String, Object>();
+        atts1.put("A", "1");
+        atts1.put("B", "2");
+        rbf1.addCapability("foo", atts1, null);
+        rbf1.addIdentityCapability("foo", Version.parseVersion("1"));
+        XResource res1 = rbf1.getResource();
+        storage.addResource(res1);
+
+        XResourceBuilder<XResource> rbf2 = getXResourceBuilder();
+        Map<String, Object> atts2 = new HashMap<String, Object>();
+        atts2.put("A", "1");
+        atts2.put("B", "3");
+        rbf2.addCapability("foo", atts2, null);
+        rbf2.addIdentityCapability("foo", Version.parseVersion("1.1"));
+        XResource res2 = rbf2.getResource();
+        storage.addResource(res2);
+
+        ExpressionCombiner ec = repository.getExpressionCombiner();
+        Requirement req1 = repository.newRequirementBuilder("foo").addDirective("filter", "(A=1)").build();
+        Requirement req2 = repository.newRequirementBuilder("foo").addDirective("filter", "(B=3)").build();
+
+        Collection<Resource> providers = repository.findProviders(ec.and(ec.expression(req1), ec.not(req2)));
+        assertEquals(1, providers.size());
+
+        Resource res = providers.iterator().next();
+        XResource xres = (XResource) res;
+        XIdentityCapability icap = xres.getIdentityCapability();
+        assertEquals("foo", icap.getName());
+        assertEquals(Version.parseVersion("1.0"), icap.getVersion());
+    }
+
     private XResourceBuilder<XResource> getXResourceBuilder() {
         XResourceBuilder<XResource> rbf = XResourceBuilderFactory.create();
 

@@ -122,13 +122,24 @@ public class AbstractPersistentRepository extends AbstractRepository implements 
             return Collections.emptyList();
 
         List<Resource> l = null;
+        List<NotExpression> notExpressions = new ArrayList<NotExpression>();
         for (RequirementExpression req : reqs) {
+            if (req instanceof NotExpression) {
+                notExpressions.add((NotExpression) req);
+                continue;
+            }
             if (l == null) {
                 // first condition
                 l = new ArrayList<Resource>(findProviders(req));
             } else {
                 l.retainAll(findProviders(req));
             }
+        }
+
+        // Handle the not expressions
+        for (NotExpression req : notExpressions) {
+            NotExpression ne = req;
+            l.removeAll(findProviders(ne.getRequirement()));
         }
 
         return l;
