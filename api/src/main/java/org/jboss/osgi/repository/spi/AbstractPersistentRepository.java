@@ -23,6 +23,7 @@ import static org.jboss.osgi.repository.RepositoryMessages.MESSAGES;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.jboss.osgi.repository.RepositoryStorage;
@@ -116,8 +117,21 @@ public class AbstractPersistentRepository extends AbstractRepository implements 
     }
 
     private Collection<Resource> findAndExpression(AndExpression re) {
-        // TODO Auto-generated method stub
-        return null;
+        List<RequirementExpression> reqs = re.getRequirements();
+        if (reqs.size() == 0)
+            return Collections.emptyList();
+
+        List<Resource> l = null;
+        for (RequirementExpression req : reqs) {
+            if (l == null) {
+                // first condition
+                l = new ArrayList<Resource>(findProviders(req));
+            } else {
+                l.retainAll(findProviders(req));
+            }
+        }
+
+        return l;
     }
 
     private Collection<Resource> findOrExpression(OrExpression re) {

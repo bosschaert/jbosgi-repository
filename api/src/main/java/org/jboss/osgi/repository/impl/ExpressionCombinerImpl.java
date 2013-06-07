@@ -24,6 +24,7 @@ package org.jboss.osgi.repository.impl;
  */
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import org.osgi.resource.Requirement;
@@ -46,6 +47,11 @@ public class ExpressionCombinerImpl implements ExpressionCombiner {
                 }
                 return l;
             }
+
+            @Override
+            public String toString() {
+                return formatRequirements("and", getRequirements());
+            }
         };
     }
 
@@ -55,6 +61,11 @@ public class ExpressionCombinerImpl implements ExpressionCombiner {
             @Override
             public List<RequirementExpression> getRequirements() {
                 return Arrays.asList(reqs);
+            }
+
+            @Override
+            public String toString() {
+                return formatRequirements("and", getRequirements());
             }
         };
     }
@@ -66,6 +77,11 @@ public class ExpressionCombinerImpl implements ExpressionCombiner {
             public Requirement getRequirement() {
                 return req;
             }
+
+            @Override
+            public String toString() {
+                return getRequirement().toString();
+            }
         };
     }
 
@@ -76,6 +92,11 @@ public class ExpressionCombinerImpl implements ExpressionCombiner {
             public RequirementExpression getRequirement() {
                 return expression(req);
             }
+
+            @Override
+            public String toString() {
+                return "not(" + getRequirement() + ")";
+            }
         };
     }
 
@@ -85,6 +106,11 @@ public class ExpressionCombinerImpl implements ExpressionCombiner {
             @Override
             public RequirementExpression getRequirement() {
                 return req;
+            }
+
+            @Override
+            public String toString() {
+                return "not(" + getRequirement() + ")";
             }
         };
     }
@@ -100,6 +126,11 @@ public class ExpressionCombinerImpl implements ExpressionCombiner {
                 }
                 return l;
             }
+
+            @Override
+            public String toString() {
+                return formatRequirements("or", getRequirements());
+            }
         };
     }
 
@@ -110,6 +141,23 @@ public class ExpressionCombinerImpl implements ExpressionCombiner {
             public List<RequirementExpression> getRequirements() {
                 return Arrays.asList(reqs);
             }
+
+            @Override
+            public String toString() {
+                return formatRequirements("or", getRequirements());
+            }
         };
+    }
+
+    private String formatRequirements(String operator, Collection<RequirementExpression> reqs) {
+        StringBuilder sb = new StringBuilder("(");
+        for (RequirementExpression re : reqs) {
+            if (sb.length() > 1)
+                sb.append(" " + operator + " ");
+
+            sb.append(re.toString());
+        }
+        sb.append(")");
+        return sb.toString();
     }
 }

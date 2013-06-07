@@ -28,6 +28,8 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 
@@ -52,6 +54,8 @@ import org.jboss.osgi.resolver.XIdentityCapability;
 import org.jboss.osgi.resolver.XRequirement;
 import org.jboss.osgi.resolver.XRequirementBuilder;
 import org.jboss.osgi.resolver.XResource;
+import org.jboss.osgi.resolver.XResourceBuilder;
+import org.jboss.osgi.resolver.XResourceBuilderFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -196,5 +200,59 @@ public class PersistentRepositoryTestCase extends AbstractRepositoryTest {
             assertTrue(Version.parseVersion("1.2.8").equals(icap.getVersion()) ||
                        Version.parseVersion("1.4.0").equals(icap.getVersion()));
         }
+    }
+
+    @Test
+    public void testFindAndRequirementExpression() throws Exception {
+        RepositoryStorage storage = repository.getRepositoryStorage();
+
+        XResourceBuilder<XResource> rbf1 = getXResourceBuilder();
+        Map<String, Object> atts1 = new HashMap<String, Object>();
+        atts1.put("A", "1");
+        atts1.put("B", "2");
+        rbf1.addCapability("foo", atts1, null);
+        rbf1.addIdentityCapability("foo", Version.parseVersion("1"));
+        XResource res1 = rbf1.getResource();
+        storage.addResource(res1);
+
+        XResourceBuilder<XResource> rbf2 = getXResourceBuilder();
+        Map<String, Object> atts2 = new HashMap<String, Object>();
+        atts2.put("A", "1");
+        atts2.put("B", "3");
+        rbf2.addCapability("foo", atts2, null);
+        rbf2.addIdentityCapability("foo", Version.parseVersion("1.1"));
+        XResource res2 = rbf2.getResource();
+        storage.addResource(res2);
+
+        ExpressionCombiner ec = repository.getExpressionCombiner();
+        Requirement req1 = repository.newRequirementBuilder("foo").addDirective("filter", "(A=1)").build();
+        Requirement req2 = repository.newRequirementBuilder("foo").addDirective("filter", "(B=3)").build();
+
+        Collection<Resource> providers = repository.findProviders(ec.and(req1, req2));
+        assertEquals(1, providers.size());
+
+        Resource res = providers.iterator().next();
+        XResource xres = (XResource) res;
+        XIdentityCapability icap = xres.getIdentityCapability();
+        assertEquals("foo", icap.getName());
+        assertEquals(Version.parseVersion("1.1"), icap.getVersion());
+    }
+
+    private XResourceBuilder<XResource> getXResourceBuilder() {
+        XResourceBuilder<XResource> rbf = XResourceBuilderFactory.create();
+
+        Map<String, Object> catts = new HashMap<String, Object>();
+        catts.put(ContentNamespace.CAPABILITY_URL_ATTRIBUTE, getURL("/content/sample1.txt"));
+        rbf.addCapability(ContentNamespace.CONTENT_NAMESPACE, catts, null);
+
+        return rbf;
+    }
+
+    private String getURL(String fname) {
+        URL url = getClass().getResource(fname);
+        if (url == null)
+            return "";
+
+        return url.toExternalForm();
     }
 }
