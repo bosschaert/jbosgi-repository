@@ -24,7 +24,9 @@ import static org.jboss.osgi.repository.RepositoryMessages.MESSAGES;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.jboss.osgi.repository.RepositoryStorage;
 import org.jboss.osgi.repository.RepositoryStorageFactory;
@@ -146,7 +148,7 @@ public class AbstractPersistentRepository extends AbstractRepository implements 
     }
 
     private Collection<Resource> findOrExpression(OrExpression re) {
-        List<Resource> l = new ArrayList<Resource>();
+        Set<Resource> l = new HashSet<Resource>();
         for (RequirementExpression req : re.getRequirements()) {
             l.addAll(findProviders(req));
         }
