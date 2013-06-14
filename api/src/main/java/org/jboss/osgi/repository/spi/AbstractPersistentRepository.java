@@ -21,39 +21,22 @@ package org.jboss.osgi.repository.spi;
 
 import static org.jboss.osgi.repository.RepositoryMessages.MESSAGES;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 import org.jboss.osgi.repository.RepositoryStorage;
 import org.jboss.osgi.repository.RepositoryStorageFactory;
 import org.jboss.osgi.repository.XPersistentRepository;
 import org.jboss.osgi.repository.XRepository;
-import org.jboss.osgi.repository.impl.ExpressionCombinerImpl;
-import org.jboss.osgi.repository.impl.RequirementBuilderImpl;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Requirement;
-import org.osgi.resource.Resource;
-import org.osgi.service.repository.AndExpression;
-import org.osgi.service.repository.ExpressionCombiner;
-import org.osgi.service.repository.NotExpression;
-import org.osgi.service.repository.OrExpression;
-import org.osgi.service.repository.RequirementBuilder;
-import org.osgi.service.repository.RequirementExpression;
-import org.osgi.service.repository.SimpleRequirementExpression;
 
 /**
  * A {@link XRepository} that delegates to {@link RepositoryStorage}.
  *
  * @author thomas.diesler@jboss.com
- * @author David Bosschaert
  * @since 11-May-2012
  */
 public class AbstractPersistentRepository extends AbstractRepository implements XPersistentRepository {
-
     private final RepositoryStorage storage;
     private XRepository delegate;
 
@@ -84,84 +67,5 @@ public class AbstractPersistentRepository extends AbstractRepository implements 
             providers = delegate.findProviders(req);
         }
         return providers;
-    }
-
-    @Override
-    public Collection<Resource> findProviders(RequirementExpression re) {
-        if (re == null)
-            throw MESSAGES.illegalArgumentNull("req");
-
-        if (re instanceof SimpleRequirementExpression) {
-            return findSimpleRequirementExpression((SimpleRequirementExpression) re);
-        } else if (re instanceof AndExpression) {
-            return findAndExpression((AndExpression) re);
-        } else if (re instanceof OrExpression) {
-            return findOrExpression((OrExpression) re);
-        } else if (re instanceof NotExpression) {
-            throw MESSAGES.unsupportedExpression(re);
-        }
-
-        throw MESSAGES.malformedRequirementExpression(re);
-    }
-
-    private Collection<Resource> findSimpleRequirementExpression(SimpleRequirementExpression re) {
-        Requirement req = re.getRequirement();
-        Collection<Capability> capabilities = findProviders(req);
-
-        List<Resource> resources = new ArrayList<Resource>();
-        for (Capability cap : capabilities) {
-            Resource res = cap.getResource();
-            if (res != null) {
-                resources.add(res);
-            }
-        }
-        return resources;
-    }
-
-    private Collection<Resource> findAndExpression(AndExpression re) {
-        List<RequirementExpression> reqs = re.getRequirements();
-        if (reqs.size() == 0)
-            return Collections.emptyList();
-
-        List<Resource> l = null;
-        List<NotExpression> notExpressions = new ArrayList<NotExpression>();
-        for (RequirementExpression req : reqs) {
-            if (req instanceof NotExpression) {
-                notExpressions.add((NotExpression) req);
-                continue;
-            }
-            if (l == null) {
-                // first condition
-                l = new ArrayList<Resource>(findProviders(req));
-            } else {
-                l.retainAll(findProviders(req));
-            }
-        }
-
-        // Handle the not expressions
-        for (NotExpression req : notExpressions) {
-            NotExpression ne = req;
-            l.removeAll(findProviders(ne.getRequirement()));
-        }
-
-        return l;
-    }
-
-    private Collection<Resource> findOrExpression(OrExpression re) {
-        Set<Resource> l = new HashSet<Resource>();
-        for (RequirementExpression req : re.getRequirements()) {
-            l.addAll(findProviders(req));
-        }
-        return l;
-    }
-
-    @Override
-    public ExpressionCombiner getExpressionCombiner() {
-        return new ExpressionCombinerImpl();
-    }
-
-    @Override
-    public RequirementBuilder newRequirementBuilder(String namespace) {
-        return new RequirementBuilderImpl(namespace);
     }
 }
