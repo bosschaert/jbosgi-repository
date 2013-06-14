@@ -152,8 +152,30 @@ public abstract class AbstractRepository implements XRepository {
             Requirement req = ((SimpleRequirementExpression) re).getRequirement();
             Requirement nreq = negateRequirement(req);
             return findSimpleRequirement(nreq);
+        } else if (re instanceof NotExpression) {
+            return findProviders(((NotExpression) re).getRequirement());
+        } else if (re instanceof AndExpression) {
+            return findInverse(re);
+        } else if (re instanceof OrExpression) {
+            return findInverse(re);
         }
         throw new UnsupportedOperationException();
+    }
+
+    private Collection<Resource> findInverse(RequirementExpression re) {
+        Collection<Resource> andProviders = findProviders(re);
+
+        Requirement matchAll = newRequirementBuilder("osgi.identity").build();
+        Collection<Resource> allResources = findSimpleRequirement(matchAll);
+
+        // TODO would be better if this filtering was done lazily
+        Collection<Resource> result = new ArrayList<Resource>();
+        for (Resource res : allResources) {
+            if (andProviders.contains(res))
+                continue;
+            result.add(res);
+        }
+        return result;
     }
 
     private Requirement negateRequirement(Requirement req) {

@@ -427,6 +427,35 @@ public class PersistentRepositoryTestCase extends AbstractRepositoryTest {
                         Version.parseVersion("2.3.0"),
                         Version.parseVersion("2.3.1")));
         assertEquals(expectedVersions2, getVersions(provd));
+
+        Requirement req5 = repository.newRequirementBuilder("y").addDirective("filter", "(jam=no)").build();
+        Collection<Resource> prove = repository.findProviders(ec.expression(req5));
+        assertEquals(1, prove.size());
+        assertEquals(Collections.singleton(Version.parseVersion("2.3.1")), getVersions(prove));
+
+        RequirementExpression ref = ec.not(ec.not(req5));
+        Collection<Resource> provf = repository.findProviders(ref);
+        assertEquals(1, provf.size());
+        assertEquals(Collections.singleton(Version.parseVersion("2.3.1")), getVersions(prove));
+
+        Requirement req6 = repository.newRequirementBuilder("x").addDirective("filter", "(test=yes)").build();
+        Requirement req7 = repository.newRequirementBuilder("y").addDirective("filter", "(jam=lots)").build();
+        RequirementExpression reg = ec.not(ec.and(req6, req7));
+        Collection<Resource> provg = repository.findProviders(reg);
+        assertEquals(3, provg.size());
+        Set<Version> expectedVersions3 = new HashSet<Version>(
+                Arrays.asList(
+                        Version.parseVersion("1.2.3.beta4"),
+                        Version.parseVersion("2.0"),
+                        Version.parseVersion("2.3.1")));
+        assertEquals(expectedVersions3, getVersions(provg));
+
+        Requirement req8 = repository.newRequirementBuilder("x").addDirective("filter", "(test=yes)").build();
+        Requirement req9 = repository.newRequirementBuilder("y").addDirective("filter", "(jam=lots)").build();
+        RequirementExpression reh = ec.not(ec.or(req8, req9));
+        Collection<Resource> provh = repository.findProviders(reh);
+        assertEquals(1, provh.size());
+        assertEquals(Collections.singleton(Version.parseVersion("2.3.1")), getVersions(provh));
     }
 
     private Set<Version> getVersions(Collection<Resource> resources) {
