@@ -85,7 +85,7 @@ public abstract class AbstractRepository implements XRepository {
         } else if (re instanceof OrExpression) {
             return findOrExpression((OrExpression) re);
         } else if (re instanceof NotExpression) {
-            throw MESSAGES.unsupportedExpression(re);
+            return findNotExpression((NotExpression) re);
         }
 
         throw MESSAGES.malformedRequirementExpression(re);
@@ -93,6 +93,10 @@ public abstract class AbstractRepository implements XRepository {
 
     private Collection<Resource> findSimpleRequirementExpression(SimpleRequirementExpression re) {
         Requirement req = re.getRequirement();
+        return findSimpleRequirement(req);
+    }
+
+    private Collection<Resource> findSimpleRequirement(Requirement req) {
         Collection<Capability> capabilities = findProviders(req);
 
         List<Resource> resources = new ArrayList<Resource>();
@@ -140,6 +144,29 @@ public abstract class AbstractRepository implements XRepository {
             l.addAll(findProviders(req));
         }
         return l;
+    }
+
+    private Collection<Resource> findNotExpression(NotExpression ne) {
+        RequirementExpression re = ne.getRequirement();
+        if (re instanceof SimpleRequirementExpression) {
+            Requirement req = ((SimpleRequirementExpression) re).getRequirement();
+            Requirement nreq = negateRequirement(req);
+            return findSimpleRequirement(nreq);
+        }
+        throw new UnsupportedOperationException();
+    }
+
+    private Requirement negateRequirement(Requirement req) {
+        String filter = req.getDirectives().get("filter");
+        if (filter == null) {
+            throw new IllegalStateException("No filter directive: " + req);
+        }
+        String invFilter = "(!" + filter + ")";
+        return newRequirementBuilder(req.getNamespace()).
+            setAttributes(req.getAttributes()).
+            setDirectives(req.getDirectives()).
+            addDirective("filter", invFilter).
+            build();
     }
 
     @Override
